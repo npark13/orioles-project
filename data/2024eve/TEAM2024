@@ -1,32 +1,32 @@
-ALS,A,American League,All-Stars (A)
-ANA,A,Anaheim,Angels
-BAL,A,Baltimore,Orioles
-BOS,A,Boston,Red Sox
-CHA,A,Chicago,White Sox
-CLE,A,Cleveland,Guardians
-DET,A,Detroit,Tigers
-HOU,A,Houston,Astros
-KCA,A,Kansas City,Royals
-MIN,A,Minnesota,Twins
-NYA,A,New York,Yankees
-OAK,A,Oakland,Athletics
-SEA,A,Seattle,Mariners
-TBA,A,Tampa Bay,Rays
-TEX,A,Texas,Rangers
-TOR,A,Toronto,Blue Jays
-ARI,N,Arizona,Diamondbacks
-ATL,N,Atlanta,Braves
-CHN,N,Chicago,Cubs
-CIN,N,Cincinnati,Reds
-COL,N,Colorado,Rockies
-LAN,N,Los Angeles,Dodgers
-MIA,N,Miami,Marlins
-MIL,N,Milwaukee,Brewers
-NLS,N,National League,All-Stars (N)
-NYN,N,New York,Mets
-PHI,N,Philadelphia,Phillies
-PIT,N,Pittsburgh,Pirates
-SDN,N,San Diego,Padres
-SFN,N,San Francisco,Giants
-SLN,N,St. Louis,Cardinals
-WAS,N,Washington,Nationals
+ALS,A,American League,All-Stars (A),N/A,N/A
+ANA,A,Anaheim,Angels,33.800278,-117.882778
+BAL,A,Baltimore,Orioles,39.283889,-76.621667
+BOS,A,Boston,Red Sox,42.346389,-71.097778
+CHA,A,Chicago,White Sox,41.83,-87.633889
+CLE,A,Cleveland,Guardians,41.495833,-81.685278	
+DET,A,Detroit,Tigers,42.339167,-83.048611
+HOU,A,Houston,Astros,29.756944,-95.355556
+KCA,A,Kansas City,Royals,39.051389,-94.480556
+MIN,A,Minnesota,Twins,44.981667,-93.278333
+NYA,A,New York,Yankees,40.829167,-73.926389
+OAK,A,Oakland,Athletics,38.580372,-121.5138
+SEA,A,Seattle,Mariners,47.591,-122.333
+TBA,A,Tampa Bay,Rays,27.980278,-82.506667
+TEX,A,Texas,Rangers,32.7475,-97.084167
+TOR,A,Toronto,Blue Jays,43.641389,-79.389167
+ARI,N,Arizona,Diamondbacks,33.445278,-112.066944
+ATL,N,Atlanta,Braves,33.89,-84.468
+CHN,N,Chicago,Cubs,41.948056,-87.655556
+CIN,N,Cincinnati,Reds,39.0975,-84.506667
+COL,N,Colorado,Rockies,39.756111,-104.994167
+LAN,N,Los Angeles,Dodgers,34.073611,-118.24
+MIA,N,Miami,Marlins,25.778056,-80.219722
+MIL,N,Milwaukee,Brewers,43.028333,-87.971111
+NLS,N,National League,All-Stars (N),N/A,N/A
+NYN,N,New York,Mets,40.756944,-73.845833
+PHI,N,Philadelphia,Phillies,39.905833,-75.166389
+PIT,N,Pittsburgh,Pirates,40.446944,-80.005833
+SDN,N,San Diego,Padres,32.7073,-117.1566
+SFN,N,San Francisco,Giants,37.778611,-122.389167
+SLN,N,St. Louis,Cardinals,38.6225,-90.193056
+WAS,N,Washington,Nationals,38.872778,-77.0075
