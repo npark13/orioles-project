@@ -1,0 +1,112 @@
+[OK] Parsed 10616 games, 331382 roster rows, 1069490 plays into out
+[OK] Parsed 8019 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5124340617935192
+Home average runs in 1st: 0.6220798794272796
+Visitor % scoring in 1st: 0.2841936699321778
+Home % scoring in 1st: 0.3307272042200452
+[OK] Parsed 24297 games, 735163 roster rows, 2382980 plays into out
+[OK] Parsed 14557 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.533604971807219
+Home average runs in 1st: 0.6241922871136354
+Visitor % scoring in 1st: 0.2985553772070626
+Home % scoring in 1st: 0.33370374943408654
+[OK] Parsed 24291 games, 720120 roster rows, 2379532 plays into out
+[OK] Parsed 13593 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5831377876579803
+Home average runs in 1st: 0.6833806759705241
+Visitor % scoring in 1st: 0.31505495862665184
+Home % scoring in 1st: 0.3518587131036186
+[OK] Parsed 21594 games, 636039 roster rows, 2102081 plays into out
+[OK] Parsed 11834 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5982680374178012
+Home average runs in 1st: 0.6958414374363249
+Visitor % scoring in 1st: 0.31582847087153837
+Home % scoring in 1st: 0.3461146614800408
+[OK] Parsed 20337 games, 578611 roster rows, 1917846 plays into out
+[OK] Parsed 10046 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5211191424497221
+Home average runs in 1st: 0.6149874612774745
+Visitor % scoring in 1st: 0.29188179180803464
+Home % scoring in 1st: 0.33053056006293946
+[OK] Parsed 19805 games, 541087 roster rows, 1835946 plays into out
+[OK] Parsed 9193 roster rows → out/rosters.csv
+/Users/kevinhe/orioles-project/join_names.py:6: DtypeWarning: Columns (7) have mixed types. Specify dtype option on import or set low_memory=False.
+  plays = pd.read_csv(out / "plays.csv")
+[OK] wrote plays_named.csv and roster_named.csv
+/Users/kevinhe/orioles-project/analyze_home_ad.py:13: DtypeWarning: Columns (7) have mixed types. Specify dtype option on import or set low_memory=False.
+  plays = pd.read_csv(plays_csv)
+Visitor average runs in 1st: 0.4993183539510225
+Home average runs in 1st: 0.6212067659681898
+Visitor % scoring in 1st: 0.2785155263822267
+Home % scoring in 1st: 0.32668518050997225
+[OK] Parsed 15922 games, 430136 roster rows, 1468843 plays into out
+[OK] Parsed 7559 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.4899510111795001
+Home average runs in 1st: 0.5915086044466775
+Visitor % scoring in 1st: 0.27144831051375456
+Home % scoring in 1st: 0.31742243436754175
+[OK] Parsed 11948 games, 308877 roster rows, 1090664 plays into out
+[OK] Parsed 6143 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5423501841312354
+Home average runs in 1st: 0.6380984265148979
+Visitor % scoring in 1st: 0.2917643120187479
+Home % scoring in 1st: 0.333026447941078
+[OK] Parsed 11697 games, 275409 roster rows, 1031857 plays into out
+[OK] Parsed 5774 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5405659570830127
+Home average runs in 1st: 0.621013935197059
+Visitor % scoring in 1st: 0.28554330170129094
+Home % scoring in 1st: 0.32162092844319057
+[OK] Parsed 12393 games, 283775 roster rows, 1097986 plays into out
+[OK] Parsed 5238 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.6030823852174615
+Home average runs in 1st: 0.6905511175663681
+Visitor % scoring in 1st: 0.31098200597111275
+Home % scoring in 1st: 0.34882595013313966
+[OK] Parsed 11848 games, 270884 roster rows, 1054155 plays into out
+[OK] Parsed 5307 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5845712356515868
+Home average runs in 1st: 0.6747974341661039
+Visitor % scoring in 1st: 0.3165091154625253
+Home % scoring in 1st: 0.35094530722484807
+[OK] Parsed 11878 games, 261326 roster rows, 1033803 plays into out
+[OK] Parsed 5521 roster rows → out/rosters.csv
+[OK] wrote plays_named.csv and roster_named.csv
+Visitor average runs in 1st: 0.5373800303081326
+Home average runs in 1st: 0.5826738508166358
+Visitor % scoring in 1st: 0.29954537800976594
+Home % scoring in 1st: 0.31907728573833977
+
+===== Processing 2020seve (2020 decade) =====
+
+===== Processing 2010seve (2010 decade) =====
+
+===== Processing 2000seve (2000 decade) =====
+
+===== Processing 1990seve (1990 decade) =====
+
+===== Processing 1980seve (1980 decade) =====
+
+===== Processing 1970seve (1970 decade) =====
+
+===== Processing 1960seve (1960 decade) =====
+
+===== Processing 1950seve (1950 decade) =====
+
+===== Processing 1940seve (1940 decade) =====
+
+===== Processing 1930seve (1930 decade) =====
+
+===== Processing 1920seve (1920 decade) =====
+
+===== Processing 1910seve (1910 decade) =====
