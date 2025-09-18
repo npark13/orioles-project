@@ -22,7 +22,7 @@ with open(output_file, "w", encoding="utf-8") as f:
                 stdout=f, stderr=f
             )
         else:
-            f.write(f"⚠️ Skipping rosters for {event}, missing {teamfile}\n")
+            f.write(f"Skipping rosters for {event}, missing {teamfile}\n")
 
         # join-names and analyze
         subprocess.run(
