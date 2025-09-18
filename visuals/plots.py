@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 def readdata(filename):
 
     with open(filename, "r") as f:
-        return np.genfromtxt(f, delimiter=',', skip_header=1; unpack=False)
+        return np.genfromtxt(f, delimiter=',', skip_header=1, unpack=False)
     
 def summarizeData(plays_csv="out/plays.csv"):
 
@@ -14,6 +14,7 @@ def summarizeData(plays_csv="out/plays.csv"):
 
     for each_row_of_data in dataStats:
         innings.append(each_row_of_data[1])
+        years.append()
         
 
     plt.plot(innings, runs, "o")
