@@ -56,7 +56,7 @@ def main():
 
     elif args.command == "analyze":
         if args.all_years:
-            analyze_home_ad.summarize_all(Path(args.out_root))
+            analyze_home_ad.summarize_all_innings(Path(args.out_root))
         else:
             analyze_home_ad.summarize_year(Path(args.plays_csv))
 
