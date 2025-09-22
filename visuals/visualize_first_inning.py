@@ -5,8 +5,8 @@ import os
 # Function to plot visitor vs home average runs
 def plot_avg_runs(df, save_path="avg_runs_plot.png"):
     innings = df["inning"]
-    visitor_avg_runs = df["visitor_avg_runs_1st"]
-    home_avg_runs = df["home_avg_runs_1st"]
+    visitor_avg_runs = df["visitor_avg_runs"]
+    home_avg_runs = df["home_avg_runs"]
 
     plt.figure(figsize=(10, 6))
     plt.plot(innings, visitor_avg_runs, label="Visitor Avg Runs (1st Inning)", marker="o", linestyle="-")
