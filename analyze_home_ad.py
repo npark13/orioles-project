@@ -11,7 +11,7 @@ def runs_from_event(event: str) -> int:
         runs += 1
     return runs
 
-def summarize_year_all_innings(plays_csv: Path) -> dict:
+def summarize_year(plays_csv: Path) -> dict:
     df = pd.read_csv(plays_csv)
     if "inning" not in df.columns or "batting_home" not in df.columns:
         return {}
@@ -49,7 +49,7 @@ def summarize_all_innings(out_root: Path) -> Path:
         plays_csv = year_dir / "plays.csv"
         if not plays_csv.exists():
             continue
-        stats_list = summarize_year_all_innings(plays_csv)
+        stats_list = summarize_year(plays_csv)
         if stats_list:
             for stats in stats_list:
                 stats["year"] = year_dir.name
