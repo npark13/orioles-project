@@ -9,11 +9,11 @@ def plot_avg_runs(df, save_path="avg_runs_plot.png"):
     home_avg_runs = df["home_avg_runs"]
 
     plt.figure(figsize=(10, 6))
-    plt.plot(innings, visitor_avg_runs, label="Visitor Avg Runs (1st Inning)", marker="o", linestyle="-")
-    plt.plot(innings, home_avg_runs, label="Home Avg Runs (1st Inning)", marker="s", linestyle="-")
+    plt.plot(innings, visitor_avg_runs, label="Visitor Avg Runs", marker="o", linestyle="-")
+    plt.plot(innings, home_avg_runs, label="Home Avg Runs", marker="s", linestyle="-")
     plt.xlabel("Year")
-    plt.ylabel("Average Runs in 1st Inning")
-    plt.title("Visitor vs Home Average Runs in 1st Inning by Year")
+    plt.ylabel("Average Runs")
+    plt.title("Average Runs per Inning 2010-2024")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
