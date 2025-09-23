@@ -99,31 +99,28 @@ def plot_differential_runs_first_inning(df, save_path="differential_runs_first_i
     plt.savefig(save_path)
     plt.show()
 
-def plot_home_vs_visitor_first_inning_line(df, save_path="home_vs_visitor_first_inning_line.png"):
-    # Use visitor_avg_runs for x-axis
-    first_inning = df.copy()
-
-    # Group by visitor_avg_runs and calculate average home first-inning runs
-    avg_home_runs = first_inning.groupby("visitor_avg_runs_1st")["home_avg_runs_1st"].mean().reset_index()
-
-    plt.figure(figsize=(8,6))
-    plt.plot(avg_home_runs["visitor_avg_runs_1st"], avg_home_runs["home_avg_runs_1st"],
-             marker="o", linestyle="-", color="blue")
+def plot_home_vs_visitor_first_inning_line(df, save_path: str = "home_vs_visitor_first_inning.png"):
+    plt.figure(figsize=(8, 5))
+    plt.plot(df["visitor_bin"], df["avg_home_runs_first_inning"], marker='o', linestyle='-')
     plt.xlabel("Visitor Runs in First Inning")
-    plt.ylabel("Average Home Runs in First Inning")
-    plt.title("Average Home Runs vs Visitor Runs in First Inning")
-    plt.grid(True, linestyle="--", alpha=0.6)
-    plt.xticks(range(1, 5))
-    plt.tight_layout()
-    plt.savefig(save_path)
+    plt.ylabel("Average Home Team Runs in First Inning")
+    plt.title("Correlation of Home Scoring and Visitor Scoring")
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
+
+
 
 def main():
     # Load inning summary CSV
     csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
     csv_path_two = "/Users/kevinhe/orioles-project/data/out/first_inning_summary.csv"
+    csv_path_three = "/Users/kevinhe/orioles-project/data/out/visitor_vs_home_first_inning.csv"
+
     df = pd.read_csv(csv_path)
     df_2 = pd.read_csv(csv_path_two)
+    df_3 = pd.read_csv(csv_path_three)
+
 
 
     # restrict to 2010–present
@@ -137,7 +134,8 @@ def main():
     # home_versus_visiting_inning(df_grouped)
     # plot_differential_runs_per_inning(df_grouped)
     # plot_differential_runs_first_inning(df_2)
-    plot_home_vs_visitor_first_inning_line(df_2)
+    plot_home_vs_visitor_first_inning_line(df_3)
+
 
 
 

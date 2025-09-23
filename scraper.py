@@ -32,6 +32,12 @@ def main():
     jn.add_argument("--out_root", default="data/out")
 
     an = subparsers.add_parser("analyze", help="Analyze 1st-inning home advantage")
+
+    kn = subparsers.add_parser("home-visit-corr", help="Analyze correlation between home and visiting team")
+    kn.add_argument("folder", help="Root folder with plays.csv files")
+    kn.add_argument("--out", default="data/out")
+
+
     group = an.add_mutually_exclusive_group(required=True)
     group.add_argument("--plays_csv", help="Single plays.csv")
     group.add_argument("--all_years", action="store_true")
@@ -53,6 +59,10 @@ def main():
 
     elif args.command == "join-names":
         join_names.main(args.out_root)
+
+    elif args.command == "home-visit-corr":
+        out_csv = Path(args.out) / "visitor_vs_home_first_inning.csv"
+        parse_events.correlation(args.folder, str(out_csv))
 
     elif args.command == "analyze":
         if args.all_years:

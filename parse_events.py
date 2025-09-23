@@ -145,6 +145,91 @@ def parse_event_folder(folder: str):
         g, r, pl = parse_event_file(p)
         games_all.extend(g); roster_all.extend(r); plays_all.extend(pl)
     return games_all, roster_all, plays_all
+from pathlib import Path
+import pandas as pd
+
+def correlation(root: str, out_csv: str):
+    """
+    Compute average home runs in the first inning grouped by visitor first-inning runs.
+    Only includes years 1909–2013.
+    Writes output to `out_csv`.
+    """
+    root = Path(root)
+    plays_files = list(root.rglob("plays.csv"))
+
+    if not plays_files:
+        print(f"[WARN] No plays.csv files found under {root.resolve()}")
+        return
+
+    all_first_inning = []
+
+    for f in plays_files:
+        # Extract year from parent folder
+        try:
+            year = int(f.parent.name)
+        except ValueError:
+            print(f"[WARN] Cannot determine year from folder {f.parent}. Skipping {f}.")
+            continue
+
+        # Include only years 1909–2013
+        if year < 2013 or year > 2024:
+            continue
+
+        df = pd.read_csv(f, low_memory=False)
+
+        # Keep only first-inning plays
+        df_first = df[df["inning"] == 1].copy()
+        if df_first.empty:
+            continue
+
+        # Compute home and visitor runs per game
+        visitor_runs = (
+            df_first[df_first["batting_home"] == 0]
+            .groupby("game_id")["event_raw"]
+            .apply(lambda s: sum(runs_from_event(e) for e in s))
+        )
+        home_runs = (
+            df_first[df_first["batting_home"] == 1]
+            .groupby("game_id")["event_raw"]
+            .apply(lambda s: sum(runs_from_event(e) for e in s))
+        )
+
+        df_game = pd.DataFrame({
+            "visitor_runs": visitor_runs,
+            "home_runs": home_runs
+        }).fillna(0)
+        all_first_inning.append(df_game)
+
+    if not all_first_inning:
+        print("[WARN] No first-inning data found.")
+        return
+
+    # Bin visitor runs into 0,1,2,3,4,4+
+    def visitor_bin(r):
+        return str(r) if r <= 4 else "4+"
+
+    df_all = pd.concat(all_first_inning)
+    df_all["visitor_bin"] = df_all["visitor_runs"].apply(visitor_bin)
+
+    summary = df_all.groupby("visitor_bin").agg(
+        avg_home_runs_first_inning=("home_runs", "mean"),
+        num_games=("home_runs", "size")
+    ).reindex(["0","1","2","3","4","4+"]).fillna(0).reset_index()
+
+    summary.to_csv(out_csv, index=False)
+    print(f"[OK] Visitor vs home first-inning summary written to {out_csv}")
+
+
+def runs_from_event(event: str) -> int:
+    """Count runs from a single play/event string."""
+    import re
+    if not isinstance(event, str):
+        return 0
+    runs = len(re.findall(r"-H\b", event))
+    if event.startswith("HR") and not re.search(r"\bB-?H\b", event):
+        runs += 1
+    return runs
+
 
 def parse_events_recursive(root: str, out_root: str = "data/out"):
     root = Path(root)
