@@ -16,8 +16,26 @@ def plot_runs_per_inning(df, save_path="runs_per_inning.png"):
     plt.plot(innings, total_avg_runs, marker="o", linestyle="-", color="black")
     plt.xlabel("Inning")
     plt.ylabel("Average Runs per Inning")
-    plt.title("Average Runs per Inning (Both Teams, 2010–Present)")
+    plt.title("Average Runs per Inning (Both Teams, 1909–2024)")
     plt.xticks(range(1, 11))
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+
+def home_versus_visiting_inning(df, save_path="home_versus_visiting_inning.png"):
+    innings = df["inning"]
+    visitor_avg_runs = df["visitor_avg_runs"]
+    home_avg_runs = df["home_avg_runs"]
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(innings, visitor_avg_runs, marker="o", linestyle="-", color="blue")
+    plt.plot(innings, home_avg_runs, marker="s", linestyle="-", color="red")
+    plt.xlabel("Inning")
+    plt.ylabel("Runs per Inning")
+    plt.title("Average Runs per Inning by Visitor and Home, 1909–2024")
+    plt.xticks(range(1, 11))
+    plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
     plt.savefig(save_path)
@@ -28,14 +46,15 @@ def main():
     csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
     df = pd.read_csv(csv_path)
 
-    # restrict to 1909-2013
-    df = df[(df["year"] >= 1909) & (df["year"] <= 2013)]
+    # restrict to 2010–present
+    df = df[(df["year"] <= 2023) & (df["year"] >= 1909)]
 
     # group by inning and average across all years
     df_grouped = df.groupby("inning")[["visitor_avg_runs", "home_avg_runs"]].mean().reset_index()
 
     # single plot
     plot_runs_per_inning(df_grouped)
+    home_versus_visiting_inning(df_grouped)
 
 if __name__ == "__main__":
     main()
