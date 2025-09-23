@@ -12,40 +12,56 @@ def runs_from_event(event: str) -> int:
     return runs
 
 def summarize_year(plays_csv: Path) -> list[dict]:
-    df = pd.read_csv(plays_csv)
-    if "inning" not in df.columns or "batting_home" not in df.columns:
-        return []
-    
-    # ✅ restrict to first 10 innings
+    # Read only necessary columns, keep event_raw as string
+    df = pd.read_csv(
+        plays_csv,
+        usecols=["game_id", "inning", "batting_home", "event_raw"],
+        dtype={"event_raw": str},
+        low_memory=False
+    )
+
+    # Safely convert numeric columns
+    df["inning"] = pd.to_numeric(df["inning"], errors="coerce").astype("Int64")
+    df["batting_home"] = pd.to_numeric(df["batting_home"], errors="coerce").astype("Int64")
+
+    # Drop rows with missing critical data
+    df = df.dropna(subset=["inning", "batting_home", "event_raw"])
+
+    # Only keep first 10 innings
     df = df[df["inning"] <= 10].copy()
 
+    # Calculate runs scored in each event
     df["runs_scored"] = df["event_raw"].apply(runs_from_event)
-    
+
     # Group by game, home/visitor, and inning
     g = df.groupby(["game_id", "batting_home", "inning"])["runs_scored"].sum().reset_index()
-    
+
     summary_rows = []
-    
-    # Iterate over innings 1–10 explicitly
+
+    # Iterate explicitly over innings 1–10
     for inning in range(1, 11):
         inning_data = g[g["inning"] == inning]
         if inning_data.empty:
             continue
+
+        # Make sure all games are included, even if a team didn't bat
+        all_games = inning_data["game_id"].unique()
         vis = inning_data[inning_data["batting_home"] == 0].groupby("game_id")["runs_scored"].sum()
         home = inning_data[inning_data["batting_home"] == 1].groupby("game_id")["runs_scored"].sum()
-        summary = pd.DataFrame({"visitor_runs": vis, "home_runs": home}).fillna(0)
-        
+        summary = pd.DataFrame({"visitor_runs": vis, "home_runs": home})
+
+
         summary_rows.append({
             "inning": inning,
             "games": len(summary),
-            "visitor_avg_runs": summary["visitor_runs"].mean(),
-            "home_avg_runs": summary["home_runs"].mean(),
+            "visitor_avg_runs": summary["visitor_runs"].mean(skipna=True),
+        "home_avg_runs": summary["home_runs"].mean(skipna=True),
             "visitor_p_scored": (summary["visitor_runs"] > 0).mean(),
             "home_p_scored": (summary["home_runs"] > 0).mean(),
             "home_minus_vis_runs": summary["home_runs"].mean() - summary["visitor_runs"].mean(),
             "home_minus_vis_prob": (summary["home_runs"] > 0).mean() - (summary["visitor_runs"] > 0).mean(),
         })
-    
+
     return summary_rows
 
 def summarize_all_innings(out_root: Path) -> Path:
