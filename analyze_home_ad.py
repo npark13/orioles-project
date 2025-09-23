@@ -11,11 +11,14 @@ def runs_from_event(event: str) -> int:
         runs += 1
     return runs
 
-def summarize_year(plays_csv: Path) -> dict:
+def summarize_year(plays_csv: Path) -> list[dict]:
     df = pd.read_csv(plays_csv)
     if "inning" not in df.columns or "batting_home" not in df.columns:
-        return {}
+        return []
     
+    # ✅ restrict to first 10 innings
+    df = df[df["inning"] <= 10].copy()
+
     df["runs_scored"] = df["event_raw"].apply(runs_from_event)
     
     # Group by game, home/visitor, and inning
@@ -23,9 +26,11 @@ def summarize_year(plays_csv: Path) -> dict:
     
     summary_rows = []
     
-    # Iterate over innings to compute statistics
-    for inning in sorted(df["inning"].unique()):
+    # Iterate over innings 1–10 explicitly
+    for inning in range(1, 11):
         inning_data = g[g["inning"] == inning]
+        if inning_data.empty:
+            continue
         vis = inning_data[inning_data["batting_home"] == 0].groupby("game_id")["runs_scored"].sum()
         home = inning_data[inning_data["batting_home"] == 1].groupby("game_id")["runs_scored"].sum()
         summary = pd.DataFrame({"visitor_runs": vis, "home_runs": home}).fillna(0)
