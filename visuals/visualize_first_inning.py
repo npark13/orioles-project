@@ -28,8 +28,8 @@ def main():
     csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
     df = pd.read_csv(csv_path)
 
-    # restrict to 2010–present
-    df = df[df["year"] >= 2019]
+    # restrict to 1909-2013
+    df = df[(df["year"] >= 1909) & (df["year"] <= 2013)]
 
     # group by inning and average across all years
     df_grouped = df.groupby("inning")[["visitor_avg_runs", "home_avg_runs"]].mean().reset_index()
