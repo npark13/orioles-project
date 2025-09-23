@@ -76,6 +76,7 @@ def main():
     # single plot
     plot_runs_per_inning(df_grouped)
     home_versus_visiting_inning(df_grouped)
+    plot_differential_runs_per_inning(df_grouped)
 
 if __name__ == "__main__":
     main()
