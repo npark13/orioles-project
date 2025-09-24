@@ -124,16 +124,16 @@ def main():
 
 
     # restrict to 2010–present
-    df = df[(df["year"] <= 2024) & (df["year"] >= 1909)]
+    df = df[(df["year"] <= 2024) & (df["year"] >= 2013)]
 
     # group by inning and average across all years
     df_grouped = df.groupby("inning")[["visitor_avg_runs", "home_avg_runs"]].mean().reset_index()
 
     # single plot
-    # plot_runs_per_inning(df_grouped)
-    # home_versus_visiting_inning(df_grouped)
-    # plot_differential_runs_per_inning(df_grouped)
-    # plot_differential_runs_first_inning(df_2)
+    plot_runs_per_inning(df_grouped)
+    home_versus_visiting_inning(df_grouped)
+    plot_differential_runs_per_inning(df_grouped)
+    plot_differential_runs_first_inning(df_2)
     plot_home_vs_visitor_first_inning_line(df_3)
 
 
