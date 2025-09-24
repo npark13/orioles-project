@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 # Base folder containing year folders
-base_folder = Path("/Users/kevinhe/orioles-project/data/out")
+base_folder = Path("/Users/nancypark/sports-analytics-project/orioles-project/data/out")
 
 # Initialize counters
 n1 = 0  # total games
@@ -54,11 +54,22 @@ for year in range(1911, 2025):
     n4 += (scores["home"] > scores["visitor"]).sum()
     n5 += ((scores["home"] == scores["visitor"]) & (scores["home"] != 0)).sum()
 
-# Print final table
-print("Frequency of Scoring Differences after 1st Inning, 1911-2024")
-print("-----------------------------------------------------------")
-print(f"Games: {n1}")
-print(f"Times both teams scored 0: {n2}")
-print(f"Visitor led: {n3}")
-print(f"Home led: {n4}")
-print(f"Tied, not at 0-0: {n5}")
+
+output_path = "/Users/nancypark/sports-analytics-project/orioles-project/out/first_inning_summary_stats.csv"
+
+with open(output_path, "w") as f:
+    f.write("Frequency of Scoring Differences after 1st Inning, 1911-2024\n")
+    f.write(f"Games: {n1}\n")
+    f.write(f"Times both teams scored 0: {n2}\n")
+    f.write(f"Visitor led: {n3}\n")
+    f.write(f"Home led: {n4}\n")
+    f.write(f"Tied, not at 0-0: {n5}\n")
+
+# # Print final table
+# print("Frequency of Scoring Differences after 1st Inning, 1911-2024")
+# print("-----------------------------------------------------------")
+# print(f"Games: {n1}")
+# print(f"Times both teams scored 0: {n2}")
+# print(f"Visitor led: {n3}")
+# print(f"Home led: {n4}")
+# print(f"Tied, not at 0-0: {n5}")
