@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 # Base folder containing year folders
-base_folder = Path("/Users/nancypark/sports-analytics-project/orioles-project/data/out")
+base_folder = Path("/Users/kevinhe/orioles-project/data/out")
 
 # Initialize counters
 n1 = 0  # total games
@@ -24,7 +24,7 @@ def count_runs(events):
 
 
 # Loop through years
-for year in range(1911, 2025):
+for year in range(2013, 2025):
     year_folder = base_folder / str(year)
     plays_file = year_folder / "plays.csv"
     
@@ -55,15 +55,15 @@ for year in range(1911, 2025):
     n5 += ((scores["home"] == scores["visitor"]) & (scores["home"] != 0)).sum()
 
 
-output_path = "/Users/nancypark/sports-analytics-project/orioles-project/out/first_inning_summary_stats.csv"
+output_path = "/Users/kevinhe/orioles-project/out/first_inning_summary_stats.csv"
 
 with open(output_path, "w") as f:
-    f.write("Frequency of Scoring Differences after 1st Inning, 1911-2024\n")
+    f.write("Frequency of Scoring Differences after 1st Inning, 2013-2024\n")
     f.write(f"Games: {n1}\n")
-    f.write(f"Times both teams scored 0: {n2}\n")
-    f.write(f"Visitor led: {n3}\n")
-    f.write(f"Home led: {n4}\n")
-    f.write(f"Tied, not at 0-0: {n5}\n")
+    f.write(f"Times both teams scored 0: {n2} ({round(100 * n2 / n1, 2)}%)\n")
+    f.write(f"Visitor led: {n3} ({round(100 * n3 / n1, 2)}%)\n")
+    f.write(f"Home led: {n4} ({round(100 * n4 / n1, 2)}%)\n")
+    f.write(f"Tied, not at 0-0: {n5} ({round(100 * n5 / n1, 2)}%)\n")
 
 # # Print final table
 # print("Frequency of Scoring Differences after 1st Inning, 1911-2024")
