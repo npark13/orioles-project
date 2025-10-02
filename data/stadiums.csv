@@ -1,0 +1,33 @@
+team_id,league,city,team_name,lat,lon
+ALS,A,American League,All-Stars (A), N/A, N/A
+ANA,A,Anaheim,Angels, 33.836111, -117.889722
+BAL,A,Baltimore,Orioles, 39.289444, -76.615278
+BOS,A,Boston,Red Sox, 42.360278, -71.057778
+CHA,A,Chicago,White Sox, 41.881944, -87.627778
+CLE,A,Cleveland,Guardians, 41.499167, -81.694722
+DET,A,Detroit,Tigers, 42.333333, -83.05
+HOU,A,Houston,Astros, 29.762778, -95.383056
+KCA,A,Kansas City,Royals, 39.099722, -94.578333
+MIN,A,Minnesota,Twins, 44.981944, -93.269167
+NYA,A,New York,Yankees, 40.712778, -74.006111
+OAK,A,Oakland,Athletics, 37.804444, -122.270833
+SEA,A,Seattle,Mariners, 47.603889, -122.33
+TBA,A,Tampa Bay,Rays, 27.7625, -82.545833
+TEX,A,Texas,Rangers, 32.763, -97.0326
+TOR,A,Toronto,Blue Jays, 43.6525, -79.381667
+ARI,N,Arizona,Diamondbacks, 33.448333, -112.073889
+ATL,N,Atlanta,Braves, 33.748889, -84.39
+CHN,N,Chicago,Cubs, 41.881944, -87.627778
+CIN,N,Cincinnati,Reds, 39.1, -84.5125
+COL,N,Colorado,Rockies, 39.7392, -104.9849
+LAN,N,Los Angeles,Dodgers, 34.05, -118.25
+MIA,N,Miami,Marlins, 25.78, -80.21
+MIL,N,Milwaukee,Brewers, 43.05, -87.95
+NLS,N,National League,All-Stars (N), N/A, N/A
+NYN,N,New York,Mets, 40.712778, -74.006111
+PHI,N,Philadelphia,Phillies, 39.952778, -75.163611
+PIT,N,Pittsburgh,Pirates, 40.439722, -79.976389
+SDN,N,San Diego,Padres, 32.715, -117.1625
+SFN,N,San Francisco,Giants, 37.783333, -122.416667
+SLN,N,St. Louis,Cardinals, 38.627222, -90.197778
+WAS,N,Washington,Nationals, 38.904722, -77.016389
