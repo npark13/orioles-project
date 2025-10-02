@@ -84,7 +84,6 @@ for year in range(2000, 2025):
     avg_travel = np.mean(list(team_travel.values()))
     yearly_travel.append({"year": year, "avg_travel_km": round(avg_travel, 2)})
 
-# Convert to DataFrame and save
+# Convert to DataFrame and save (no print)
 yearly_travel_df = pd.DataFrame(yearly_travel)
 yearly_travel_df.to_csv("average_travel_2020s.csv", index=False)
-print(yearly_travel_df)
