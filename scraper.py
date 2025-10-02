@@ -6,6 +6,7 @@ import parse_events
 import parse_ros
 import join_names
 import analyze_home_ad
+import travel_features
 
 def main():
     parser = argparse.ArgumentParser(description="Retrosheet Scraper & Analyzer")
@@ -36,6 +37,10 @@ def main():
     kn = subparsers.add_parser("home-visit-corr", help="Analyze correlation between home and visiting team")
     kn.add_argument("folder", help="Root folder with plays.csv files")
     kn.add_argument("--out", default="data/out")
+
+    trav = subparsers.add_parser("compute-travel", help="Compute city-to-city travel metrics")
+    trav.add_argument("games_csv", help="Input game-level CSV with date, home_team, visitor_team")
+    trav.add_argument("--out", default="data/out/games_travel.csv")
 
 
     group = an.add_mutually_exclusive_group(required=True)
@@ -69,6 +74,8 @@ def main():
             analyze_home_ad.summarize_all_innings(Path(args.out_root))
         else:
             analyze_home_ad.summarize_year(Path(args.plays_csv))
+    elif args.command == "compute-travel":
+        travel_features.main(args.games_csv, args.out)
 
 if __name__ == "__main__":
     main()
