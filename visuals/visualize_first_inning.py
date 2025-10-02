@@ -85,6 +85,29 @@ def plot_home_vs_visitor_first_inning_line(df, save_path="home_vs_visitor_first_
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
 
+def plot_average_travel(csv_path="/Users/kevinhe/orioles-project/average_travel_2020s.csv",
+                        save_path="average_travel_2014_2024.png"):
+    # Load data
+    df = pd.read_csv(csv_path)
+
+    # Filter for 2014–2024
+    df_filtered = df[(df["year"] >= 2014) & (df["year"] <= 2024)]
+
+    # Convert km to miles
+    df_filtered["avg_travel_miles"] = df_filtered["avg_travel_km"] * 0.621371
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.bar(df_filtered["year"].astype(str), df_filtered["avg_travel_miles"], color="skyblue")
+    plt.xlabel("Year")
+    plt.ylabel("Average Miles Traveled per Team")
+    plt.title("Average Miles Traveled per Team (2014–2024)")
+    plt.xticks(rotation=45)
+    plt.grid(axis="y", linestyle="--", alpha=0.6)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+
 def main():
     # Load CSVs
     csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
@@ -110,6 +133,7 @@ def main():
     plot_differential_runs_per_inning(df_grouped)
     plot_differential_runs_first_inning(df_2)
     plot_home_vs_visitor_first_inning_line(df_3)
+    plot_average_travel()
 
 if __name__ == "__main__":
     main()
