@@ -100,11 +100,49 @@ def plot_average_travel_bar(save_path="average_miles_traveled_bar.png"):
     plt.ylabel("Average Miles Traveled")
     plt.title("Average Miles Traveled per Team (2014-2024)")
     plt.xticks(df_travel["Year"])  # Show all years on x-axis
+    plt.yticks([10000, 20000, 30000, 40000])  # Set y-axis ticks manually
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.show()
 
+def plot_first_inning_summary_by_decade(csv_path, save_path="first_inning_summary_by_decade.png"):
+    """
+    Reads a decade-aggregated CSV with columns:
+    'decade', 'E[Y_away]', 'E[Y_home]', 'alpha', 'home_advantage'
+    and plots expected runs, home advantage, and dispersion (alpha)
+    """
+    df = pd.read_csv(csv_path)
+    df = df.sort_values('decade')
+    decades = df['decade'].astype(str)
+    
+    fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
+    
+    # Expected runs home vs away
+    axes[0].plot(decades, df['E[Y_away]'], marker='o', label='Away')
+    axes[0].plot(decades, df['E[Y_home]'], marker='o', label='Home')
+    axes[0].set_ylabel("Expected First-Inning Runs")
+    axes[0].set_title("Expected First-Inning Runs by Home/Away Team Over Decades")
+    axes[0].legend()
+    axes[0].grid(True)
+    
+    # Home advantage
+    axes[1].plot(decades, df['home_advantage'], marker='o', color='green')
+    axes[1].set_ylabel("Home Advantage (E[Y_home] / E[Y_away])")
+    axes[1].set_title("Home Advantage in First-Inning Runs Over Decades")
+    axes[1].grid(True)
+    
+    # Dispersion (alpha)
+    axes[2].plot(decades, df['alpha'], marker='o', color='red')
+    axes[2].set_ylabel("Dispersion Parameter α")
+    axes[2].set_title("Overdispersion in First-Inning Runs Over Decades")
+    axes[2].set_xlabel("Decade")
+    axes[2].grid(True)
+    
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.show()
 
 
 def main():
@@ -112,6 +150,7 @@ def main():
     csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
     csv_path_two = "/Users/kevinhe/orioles-project/data/out/first_inning_summary.csv"
     csv_path_three = "/Users/kevinhe/orioles-project/data/out/visitor_vs_home_first_inning.csv"
+    csv_first_inning_decade = "/Users/kevinhe/orioles-project/first_inning_nb_summary_by_decade.csv"
 
     df = pd.read_csv(csv_path)
     df_2 = pd.read_csv(csv_path_two)
@@ -133,6 +172,7 @@ def main():
     plot_differential_runs_first_inning(df_2)
     plot_home_vs_visitor_first_inning_line(df_3)
     plot_average_travel_bar()
+    plot_first_inning_summary_by_decade(csv_first_inning_decade)
 
 if __name__ == "__main__":
     main()
