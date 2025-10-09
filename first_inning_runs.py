@@ -1,54 +1,110 @@
 import pandas as pd
+import unicodedata
 import re
 import os
 
-# Function to count runs from an event
-def runs_from_event(event: str) -> int:
-    if not isinstance(event, str):
-        return 0
-    runs = len(re.findall(r'-H\b', event))
-    if event.startswith("HR"):
-        runs += 1
-    return runs
+# Folder paths
+pitching_folder = "/Users/kevinhe/orioles-project/data/out/{year}/pitching_stats.csv"
+rosters_folder = "/Users/kevinhe/orioles-project/data/out/{year}/rosters.csv"
+output_folder = "/Users/kevinhe/orioles-project/data/out/{year}/pitching_stats_fixed.csv"
 
-# Base data folder
-base_folder = "/Users/kevinhe/orioles-project/data/out/"
+# Nickname mapping
+# Updated nickname map (keys normalized)
+nickname_map = {
+    "mike": "michael",
+    "mikey": "michael",
+    "alex": "alexander",
+    "andy": "andrew",
+    "will": "william",
+    "bill": "william",
+    "matt": "matthew",
+    "jake": "jakob",
+    "vince": "vincent",
+    "ja": "james",
+    "jp": "jordan",
+}
 
-# Loop explicitly over years 1911-2024
-for year in range(1911, 2025):
-    year_folder = os.path.join(base_folder, str(year))
-    plays_file = os.path.join(year_folder, "plays.csv")
-    games_file = os.path.join(year_folder, "games.csv")
-    output_file = os.path.join(year_folder, f"first_inning_runs_summary_{year}.csv")
 
-    # Check if both files exist
-    if not os.path.exists(plays_file) or not os.path.exists(games_file):
-        print(f"Skipping {year}, missing plays.csv or games.csv")
+# Known hyphenated first names
+hyphenated_firsts = {
+    "Hyun Jin": "Hyun-Jin",
+}
+
+# Function to normalize names
+def normalize_name(s):
+    if isinstance(s, str):
+        s = s.strip()
+        if s.lower() == "league average":
+            return None
+        # Remove accents
+        s = ''.join(c for c in unicodedata.normalize('NFD', s)
+                    if unicodedata.category(c) != 'Mn')
+        # Remove non-letter chars except space and hyphen
+        s = re.sub(r"[^A-Za-z -]", "", s)
+        # Remove suffixes
+        s = re.sub(r"\b(Jr|Sr|I{2,3}|IV|V)\b", "", s, flags=re.IGNORECASE).strip()
+        # Fix nicknames
+        parts = s.split()
+        if parts and parts[0] in nickname_map:
+            parts[0] = nickname_map[parts[0]]
+        s = ' '.join(parts)
+        # Hyphenated first names
+        for key, val in hyphenated_firsts.items():
+            s = s.replace(key, val)
+        return s.lower()
+    return s
+
+# Loop through all years
+for year in range(2015, 2025):
+    pitching_path = pitching_folder.format(year=year)
+    rosters_path = rosters_folder.format(year=year)
+    output_path = output_folder.format(year=year)
+
+    if not os.path.exists(pitching_path) or not os.path.exists(rosters_path):
+        print(f"Skipping year {year}: file(s) not found.")
         continue
 
-    # Load data
-    plays_df = pd.read_csv(plays_file, low_memory=False)
-    games_df = pd.read_csv(games_file, low_memory=False)
+    # Load CSVs
+    pitching_df = pd.read_csv(pitching_path, quotechar='"')
+    rosters_df = pd.read_csv(rosters_path, quotechar='"')
 
-    # Filter for first inning
-    first_inning = plays_df[plays_df['inning'] == 1.0].copy()
+    # Strip spaces from column names
+    pitching_df.columns = [c.strip() for c in pitching_df.columns]
+    rosters_df.columns = [c.strip() for c in rosters_df.columns]
 
-    # Count runs
-    first_inning.loc[:, 'runs'] = first_inning['event_raw'].apply(runs_from_event)
+    # Combine last_name + first_name into "Player" if separate columns exist
+    if 'last_name' in pitching_df.columns and 'first_name' in pitching_df.columns:
+        pitching_df['Player'] = pitching_df['first_name'].astype(str) + ' ' + pitching_df['last_name'].astype(str)
+    elif 'last_name, first_name' in pitching_df.columns:
+        # Handle older CSV format
+        pitching_df.rename(columns={'last_name, first_name': 'Player'}, inplace=True)
+        pitching_df['Player'] = pitching_df['Player'].apply(
+            lambda x: ' '.join([y.strip() for y in x.split(',')[::-1]]) if pd.notna(x) else x
+        )
+    else:
+        print(f"Year {year}: Could not find name columns in pitching CSV")
+        continue
 
-    # Aggregate runs by game_id and batting_home (0 = away, 1 = home)
-    agg = first_inning.groupby(['game_id', 'batting_home']).agg({'runs': 'sum'}).reset_index()
+    # Normalize names
+    pitching_df['player_name_clean'] = pitching_df['Player'].apply(normalize_name)
+    rosters_df['player_name_clean'] = rosters_df['player_name'].apply(normalize_name)
 
-    # Pivot to get home vs away columns
-    pivot = agg.pivot(index='game_id', columns='batting_home', values='runs').reset_index()
-    pivot = pivot.rename(columns={0: 'visiting_first_inning_runs', 1: 'home_first_inning_runs'})
+    # Drop rows where normalization returned None
+    pitching_df = pitching_df[pitching_df['player_name_clean'].notna()].copy()
 
-    # Merge with games.csv to get team IDs
-    merged = pivot.merge(games_df[['game_id', 'visteam', 'hometeam']], on='game_id', how='left')
+    # Map normalized names to player_id
+    player_id_map = dict(zip(rosters_df['player_name_clean'], rosters_df['player_id']))
+    pitching_df['Player-additional'] = pitching_df['player_name_clean'].map(player_id_map)
 
-    # Reorder columns for output
-    merged = merged[['game_id', 'hometeam', 'visteam', 'home_first_inning_runs', 'visiting_first_inning_runs']]
+    # Print unmatched players
+    missing = pitching_df[pitching_df['Player-additional'].isna()]
+    if not missing.empty:
+        print(f"Year {year} - Players not found in rosters:")
+        print(missing[['Player']])
 
-    # Save to CSV
-    merged.to_csv(output_file, index=False)
-    print(f"Saved first-inning runs summary for {year} to {output_file}")
+    # Drop helper column
+    pitching_df = pitching_df.drop(columns=['player_name_clean'])
+
+    # Save fixed CSV
+    pitching_df.to_csv(output_path, index=False)
+    print(f"Year {year} - Fixed CSV written to {output_path}")

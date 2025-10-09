@@ -18,54 +18,39 @@ nickname_map = {
     "Bill": "William",
     "Matt": "Matthew",
     "Jake": "Jakob",
-    # add more as needed
 }
 
 # Known hyphenated first names
 hyphenated_firsts = {
     "Hyun Jin": "Hyun-Jin",
-    # add more as needed
 }
 
-# Normalize function
+# Function to normalize names
 def normalize_name(s):
     if isinstance(s, str):
         s = s.strip()
-
-        # Ignore "League Average" only
         if s.lower() == "league average":
             return None
-
-        # Handle "Last, First" format
-        if "," in s:
-            last, first = s.split(",", 1)
-            s = f"{first.strip()} {last.strip()}"
-
         # Remove accents
         s = ''.join(c for c in unicodedata.normalize('NFD', s)
                     if unicodedata.category(c) != 'Mn')
-
-        # Remove apostrophes and non-letter chars except space and hyphen
+        # Remove non-letter chars except space and hyphen
         s = re.sub(r"[^A-Za-z -]", "", s)
-
-        # Remove common suffixes: Jr., Sr., II, III, IV, V, etc.
+        # Remove suffixes
         s = re.sub(r"\b(Jr|Sr|I{2,3}|IV|V)\b", "", s, flags=re.IGNORECASE).strip()
-
-        # Split parts and fix nicknames
+        # Fix nicknames
         parts = s.split()
         if parts and parts[0] in nickname_map:
             parts[0] = nickname_map[parts[0]]
         s = ' '.join(parts)
-
-        # Replace known hyphenated first names
+        # Hyphenated first names
         for key, val in hyphenated_firsts.items():
             s = s.replace(key, val)
-
-        return s.lower()  # lowercase for case-insensitive matching
+        return s.lower()
     return s
 
-# Loop through years
-for year in range(2014, 2025):
+# Loop through all years
+for year in range(2015, 2025):
     pitching_path = pitching_folder.format(year=year)
     rosters_path = rosters_folder.format(year=year)
     output_path = output_folder.format(year=year)
@@ -75,31 +60,46 @@ for year in range(2014, 2025):
         continue
 
     # Load CSVs
-    pitching_df = pd.read_csv(pitching_path)
-    rosters_df = pd.read_csv(rosters_path)
+    pitching_df = pd.read_csv(pitching_path, quotechar='"')
+    rosters_df = pd.read_csv(rosters_path, quotechar='"')
+
+    # Strip spaces from column names
+    pitching_df.columns = [c.strip() for c in pitching_df.columns]
+    rosters_df.columns = [c.strip() for c in rosters_df.columns]
+
+    # Combine last_name + first_name into "Player" if separate columns exist
+    if 'last_name' in pitching_df.columns and 'first_name' in pitching_df.columns:
+        pitching_df['Player'] = pitching_df['first_name'].astype(str) + ' ' + pitching_df['last_name'].astype(str)
+    elif 'last_name, first_name' in pitching_df.columns:
+        # Handle older CSV format
+        pitching_df.rename(columns={'last_name, first_name': 'Player'}, inplace=True)
+        pitching_df['Player'] = pitching_df['Player'].apply(
+            lambda x: ' '.join([y.strip() for y in x.split(',')[::-1]]) if pd.notna(x) else x
+        )
+    else:
+        print(f"Year {year}: Could not find name columns in pitching CSV")
+        continue
 
     # Normalize names
     pitching_df['player_name_clean'] = pitching_df['Player'].apply(normalize_name)
     rosters_df['player_name_clean'] = rosters_df['player_name'].apply(normalize_name)
 
-    # Remove rows where normalization returned None (like "League Average")
+    # Drop rows where normalization returned None
     pitching_df = pitching_df[pitching_df['player_name_clean'].notna()].copy()
 
     # Map normalized names to player_id
     player_id_map = dict(zip(rosters_df['player_name_clean'], rosters_df['player_id']))
-
-    # Replace Player-additional with player_id
     pitching_df['Player-additional'] = pitching_df['player_name_clean'].map(player_id_map)
 
-    # Optional: print unmatched players
+    # Print unmatched players
     missing = pitching_df[pitching_df['Player-additional'].isna()]
     if not missing.empty:
         print(f"Year {year} - Players not found in rosters:")
         print(missing[['Player']])
 
-    # Drop helper column before saving
+    # Drop helper column
     pitching_df = pitching_df.drop(columns=['player_name_clean'])
 
-    # Write fixed CSV
+    # Save fixed CSV
     pitching_df.to_csv(output_path, index=False)
     print(f"Year {year} - Fixed CSV written to {output_path}")
