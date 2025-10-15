@@ -116,7 +116,7 @@ def plot_first_inning_summary_by_decade(csv_path, save_path="first_inning_summar
     df = df.sort_values('decade')
     decades = df['decade'].astype(str)
     
-    fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(12, 15), sharex=True)
     
     # Expected runs home vs away
     axes[0].plot(decades, df['E[Y_away]'], marker='o', label='Away')
@@ -130,14 +130,9 @@ def plot_first_inning_summary_by_decade(csv_path, save_path="first_inning_summar
     axes[1].plot(decades, df['home_advantage'], marker='o', color='green')
     axes[1].set_ylabel("Home Advantage (E[Y_home] / E[Y_away])")
     axes[1].set_title("Home Advantage in First-Inning Runs Over Decades")
+    axes[1].set_xlabel("Decade")
     axes[1].grid(True)
-    
-    # Dispersion (alpha)
-    axes[2].plot(decades, df['alpha'], marker='o', color='red')
-    axes[2].set_ylabel("Dispersion Parameter α")
-    axes[2].set_title("Overdispersion in First-Inning Runs Over Decades")
-    axes[2].set_xlabel("Decade")
-    axes[2].grid(True)
+
     
     plt.xticks(rotation=45)
     plt.tight_layout()
@@ -166,13 +161,13 @@ def main():
     df_grouped = df.groupby("inning")[["visitor_avg_runs", "home_avg_runs"]].mean().reset_index()
 
     # Generate plots
+    plot_first_inning_summary_by_decade(csv_first_inning_decade)
     plot_runs_per_inning(df_grouped)
     home_versus_visiting_inning(df_grouped)
     plot_differential_runs_per_inning(df_grouped)
     plot_differential_runs_first_inning(df_2)
     plot_home_vs_visitor_first_inning_line(df_3)
     plot_average_travel_bar()
-    plot_first_inning_summary_by_decade(csv_first_inning_decade)
 
 if __name__ == "__main__":
     main()

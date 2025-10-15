@@ -2,109 +2,112 @@ import pandas as pd
 import unicodedata
 import re
 import os
+import sys
 
-# Folder paths
+# --- Folder paths ---
 pitching_folder = "/Users/kevinhe/orioles-project/data/out/{year}/pitching_stats.csv"
 rosters_folder = "/Users/kevinhe/orioles-project/data/out/{year}/rosters.csv"
 output_folder = "/Users/kevinhe/orioles-project/data/out/{year}/pitching_stats_fixed.csv"
 
-# Nickname mapping
-# Updated nickname map (keys normalized)
+# --- Nickname and variant mappings ---
 nickname_map = {
-    "mike": "michael",
-    "mikey": "michael",
-    "alex": "alexander",
-    "andy": "andrew",
-    "will": "william",
-    "bill": "william",
-    "matt": "matthew",
-    "jake": "jakob",
-    "vince": "vincent",
-    "ja": "james",
-    "jp": "jordan",
+    "Mike": "Michael",
+    "Mikey": "Michael",
+    "Alex": "Alexander",
+    "Andy": "Andrew",
+    "Will": "William",
+    "Bill": "William",
+    "Matt": "Matthew",
+    "Jake": "Jakob",
+    "Louie": "Louis",
+    "Jose": "Jose",
+    "Kike": "Enrique",
+    "Enrique": "Enrique",
+    "Guillermo":"Guillo",
+    "Jake": "Jacob",
 }
 
-
-# Known hyphenated first names
+# Hyphenated first names
 hyphenated_firsts = {
     "Hyun Jin": "Hyun-Jin",
+    "Jong Ho": "Jong-Ho",
+    "Choi Ji": "Choi-Ji",
 }
 
-# Function to normalize names
+# Special full-name replacements
+special_case_names = {
+    "louis varland": "louie varland",
+    "jose a ferrer": "jose ferrer",
+    "enrique hernandez": "kike hernandez",
+}
+
+# --- Normalize player name ---
 def normalize_name(s):
-    if isinstance(s, str):
-        s = s.strip()
-        if s.lower() == "league average":
-            return None
-        # Remove accents
-        s = ''.join(c for c in unicodedata.normalize('NFD', s)
-                    if unicodedata.category(c) != 'Mn')
-        # Remove non-letter chars except space and hyphen
-        s = re.sub(r"[^A-Za-z -]", "", s)
-        # Remove suffixes
-        s = re.sub(r"\b(Jr|Sr|I{2,3}|IV|V)\b", "", s, flags=re.IGNORECASE).strip()
-        # Fix nicknames
-        parts = s.split()
-        if parts and parts[0] in nickname_map:
-            parts[0] = nickname_map[parts[0]]
-        s = ' '.join(parts)
-        # Hyphenated first names
-        for key, val in hyphenated_firsts.items():
-            s = s.replace(key, val)
-        return s.lower()
+    if not isinstance(s, str):
+        return s
+
+    if "," in s:
+        last, first = s.split(",", 1)
+        s = f"{first.strip()} {last.strip()}"
+
+    s = ''.join(c for c in unicodedata.normalize('NFD', s)
+                if unicodedata.category(c) != 'Mn')
+
+    s = re.sub(r"\b([A-Z])[\.\s]*([A-Z])[\.\s]*\b", r"\1\2", s)
+    s = re.sub(r"[^A-Za-z -]", "", s)
+    s = re.sub(r"\b(Jr|Sr|I{2,3}|IV|V)\b", "", s, flags=re.IGNORECASE).strip()
+
+    for key, val in hyphenated_firsts.items():
+        s = s.replace(key, val)
+
+    parts = s.split()
+    if parts and parts[0] in nickname_map:
+        parts[0] = nickname_map[parts[0]]
+    s = ' '.join(parts).lower().strip()
+
+    if s in special_case_names:
+        s = special_case_names[s]
+
     return s
 
-# Loop through all years
-for year in range(2015, 2025):
-    pitching_path = pitching_folder.format(year=year)
-    rosters_path = rosters_folder.format(year=year)
-    output_path = output_folder.format(year=year)
+# --- Handle year argument ---
+if len(sys.argv) >= 2:
+    year = int(sys.argv[1])
+else:
+    year = 2024  # default year
 
-    if not os.path.exists(pitching_path) or not os.path.exists(rosters_path):
-        print(f"Skipping year {year}: file(s) not found.")
-        continue
+print(f"\n=== Processing year {year} ===\n")
 
-    # Load CSVs
-    pitching_df = pd.read_csv(pitching_path, quotechar='"')
-    rosters_df = pd.read_csv(rosters_path, quotechar='"')
+pitching_path = pitching_folder.format(year=year)
+rosters_path = rosters_folder.format(year=year)
+output_path = output_folder.format(year=year)
 
-    # Strip spaces from column names
-    pitching_df.columns = [c.strip() for c in pitching_df.columns]
-    rosters_df.columns = [c.strip() for c in rosters_df.columns]
+if not os.path.exists(pitching_path) or not os.path.exists(rosters_path):
+    print(f"Skipping year {year}: file(s) not found.")
+    sys.exit(0)
 
-    # Combine last_name + first_name into "Player" if separate columns exist
-    if 'last_name' in pitching_df.columns and 'first_name' in pitching_df.columns:
-        pitching_df['Player'] = pitching_df['first_name'].astype(str) + ' ' + pitching_df['last_name'].astype(str)
-    elif 'last_name, first_name' in pitching_df.columns:
-        # Handle older CSV format
-        pitching_df.rename(columns={'last_name, first_name': 'Player'}, inplace=True)
-        pitching_df['Player'] = pitching_df['Player'].apply(
-            lambda x: ' '.join([y.strip() for y in x.split(',')[::-1]]) if pd.notna(x) else x
-        )
-    else:
-        print(f"Year {year}: Could not find name columns in pitching CSV")
-        continue
+# --- Load CSVs ---
+pitching_df = pd.read_csv(pitching_path)
+rosters_df = pd.read_csv(rosters_path)
 
-    # Normalize names
-    pitching_df['player_name_clean'] = pitching_df['Player'].apply(normalize_name)
-    rosters_df['player_name_clean'] = rosters_df['player_name'].apply(normalize_name)
+# Normalize names
+pitching_df['player_name_clean'] = pitching_df['Player'].apply(normalize_name)
+rosters_df['player_name_clean'] = rosters_df['player_name'].apply(normalize_name)
 
-    # Drop rows where normalization returned None
-    pitching_df = pitching_df[pitching_df['player_name_clean'].notna()].copy()
+# Map player names to IDs
+player_id_map = dict(zip(rosters_df['player_name_clean'], rosters_df['player_id']))
+pitching_df['Player-additional'] = pitching_df['player_name_clean'].map(player_id_map)
 
-    # Map normalized names to player_id
-    player_id_map = dict(zip(rosters_df['player_name_clean'], rosters_df['player_id']))
-    pitching_df['Player-additional'] = pitching_df['player_name_clean'].map(player_id_map)
+# Report missing players
+missing = pitching_df[pitching_df['Player-additional'].isna()]
+if not missing.empty:
+    print(f"Year {year} — Players not found in roster:")
+    print(missing[['Player']])
+    print()
 
-    # Print unmatched players
-    missing = pitching_df[pitching_df['Player-additional'].isna()]
-    if not missing.empty:
-        print(f"Year {year} - Players not found in rosters:")
-        print(missing[['Player']])
+# Drop helper column
+pitching_df = pitching_df.drop(columns=['player_name_clean'])
 
-    # Drop helper column
-    pitching_df = pitching_df.drop(columns=['player_name_clean'])
-
-    # Save fixed CSV
-    pitching_df.to_csv(output_path, index=False)
-    print(f"Year {year} - Fixed CSV written to {output_path}")
+# Save fixed CSV
+pitching_df.to_csv(output_path, index=False)
+print(f"Year {year} — Fixed CSV written to {output_path}")
