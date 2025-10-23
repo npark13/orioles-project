@@ -21,47 +21,39 @@ df.rename(columns={
 # Filter 2014-2024 safely
 df_plot = df.loc[(df['year'] >= 2014) & (df['year'] <= 2024)].copy()
 
-# ---------------------
-# Original plot (3 lines)
-# ---------------------
-plt.figure(figsize=(10,6))
-plt.plot(df_plot['year'], df_plot['home_advantage_only'], marker='o', label='Just Home Advantage')
-plt.plot(df_plot['year'], df_plot['home_advantage_era'], marker='s', label='Home Advantage + ERA')
-plt.plot(df_plot['year'], df_plot['home_advantage_era_travel'], marker='^', label='Home Advantage + ERA + Travel')
-
-plt.xlabel("Year")
-plt.ylabel("Estimated Home Advantage (Runs)")
-plt.title("MLB First-Inning Home Advantage: 2014-2024")
-plt.xticks(df_plot['year'], rotation=45)
-plt.grid(True, linestyle='--', alpha=0.5)
-plt.legend()
-plt.tight_layout()
-
-# Save the first plot
-plt.savefig("/Users/kevinhe/orioles-project/home_advantage_full.png", dpi=300)
-plt.close()
-
-# ---------------------
-# Difference plot (baseline at 0)
-# ---------------------
+# Compute differences
 df_plot['era_diff'] = df_plot['home_advantage_era'] - df_plot['home_advantage_only']
 df_plot['era_travel_diff'] = df_plot['home_advantage_era_travel'] - df_plot['home_advantage_only']
 
-plt.figure(figsize=(10,6))
-plt.plot(df_plot['year'], [0]*len(df_plot), marker='o', linestyle='--', label='Just Home Advantage (Baseline)')
-plt.plot(df_plot['year'], df_plot['era_diff'], marker='s', label='ERA Adjusted Difference')
-plt.plot(df_plot['year'], df_plot['era_travel_diff'], marker='^', label='ERA + Travel Adjusted Difference')
+# ---------------------
+# Combined figure with 2 subplots
+# ---------------------
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,10), sharex=True)
 
-plt.xlabel("Year")
-plt.ylabel("Difference from Home Advantage Only (Runs)")
-plt.title("MLB First-Inning Home Advantage Differences: 2014-2024")
+# --- Top plot: full home advantage ---
+axes[0].plot(df_plot['year'], df_plot['home_advantage_only'], marker='o', label='Just Home Advantage')
+axes[0].plot(df_plot['year'], df_plot['home_advantage_era'], marker='s', label='Home Advantage + ERA')
+axes[0].plot(df_plot['year'], df_plot['home_advantage_era_travel'], marker='^', label='Home Advantage + ERA + Travel')
+axes[0].set_ylabel("Estimated Home Advantage (Runs)")
+axes[0].set_title("MLB First-Inning Home Advantage: 2014-2024 (Only first games of series)")
+axes[0].grid(True, linestyle='--', alpha=0.5)
+axes[0].legend()
+
+# --- Bottom plot: differences from baseline ---
+axes[1].plot(df_plot['year'], [0]*len(df_plot), marker='o', linestyle='--', label='Baseline: Just Home Advantage')
+axes[1].plot(df_plot['year'], df_plot['era_diff'], marker='s', label='ERA Adjusted Difference')
+axes[1].plot(df_plot['year'], df_plot['era_travel_diff'], marker='^', label='ERA + Travel Adjusted Difference')
+axes[1].set_xlabel("Year")
+axes[1].set_ylabel("Difference from Home Advantage Only (Runs)")
+axes[1].set_title("MLB First-Inning Home Advantage Differences: 2014-2024 (Only first games of series)")
+axes[1].grid(True, linestyle='--', alpha=0.5)
+axes[1].legend()
+
 plt.xticks(df_plot['year'], rotation=45)
-plt.grid(True, linestyle='--', alpha=0.5)
-plt.legend()
 plt.tight_layout()
 
-# Save the second plot
-plt.savefig("/Users/kevinhe/orioles-project/home_advantage_diff.png", dpi=300)
+# Save combined figure
+plt.savefig("/Users/kevinhe/orioles-project/home_advantage_combined.png", dpi=300)
 plt.close()
 
-print("Plots saved to /Users/kevinhe/orioles-project/")
+print("Combined plot saved to /Users/kevinhe/orioles-project/home_advantage_combined.png")
