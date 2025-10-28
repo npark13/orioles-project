@@ -46,7 +46,7 @@ for year in years:
     print(f"\nProcessing {year}")
     games = pd.read_csv(game_file)
 
-    # --- Extract and sort by date ---
+    # --- Extract game dates ---
     games["date"] = games["game_id"].apply(lambda x: pd.to_datetime(x[3:11], format="%Y%m%d"))
     games = games.sort_values("date").reset_index(drop=True)
 
@@ -67,87 +67,58 @@ for year in years:
             games.at[idx, "visiting_last_location"] = last_location[away]
         last_location[away] = home
 
-    # --- Compute travel distances (first game of series only) ---
-    home_travel = [0.0]
-    vis_travel = [0.0]
+    # --- Compute travel distances ---
+    home_travel, vis_travel = [], []
 
-    for i in range(1, len(games)):
-        curr = games.iloc[i]
-        prev = games.iloc[i - 1]
+    for _, row in games.iterrows():
+        home_last = row["home_last_location"]
+        vis_last = row["visiting_last_location"]
+        home_team = row["hometeam"]
 
-        # Detect if this is the first game of a new series:
-        # Different opponent or different home stadium = new series
-        new_series = not (
-            curr["hometeam"] == prev["hometeam"]
-            and curr["visteam"] == prev["visteam"]
-            and curr["hometeam"] == prev["hometeam"]
-        )
+        if home_last == "N/A" or vis_last == "N/A":
+            home_travel.append(np.nan)
+            vis_travel.append(np.nan)
+            continue
 
-        if new_series:
-            home_last = curr["home_last_location"]
-            vis_last = curr["visiting_last_location"]
-            home_team = curr["hometeam"]
-            away_team = curr["visteam"]
+        try:
+            lat_home_last = float(stad_dict[home_last]["lat"])
+            lon_home_last = float(stad_dict[home_last]["lon"])
+            lat_home_team = float(stad_dict[home_team]["lat"])
+            lon_home_team = float(stad_dict[home_team]["lon"])
+            home_travel.append(haversine(lat_home_last, lon_home_last, lat_home_team, lon_home_team))
 
-            if home_last == "N/A" or vis_last == "N/A":
-                home_travel.append(np.nan)
-                vis_travel.append(np.nan)
-                continue
+            lat_vis_last = float(stad_dict[vis_last]["lat"])
+            lon_vis_last = float(stad_dict[vis_last]["lon"])
+            vis_travel.append(haversine(lat_vis_last, lon_vis_last, lat_home_team, lon_home_team))
+        except (KeyError, ValueError):
+            home_travel.append(np.nan)
+            vis_travel.append(np.nan)
 
-            try:
-                lat_home_last = float(stad_dict[home_last]["lat"])
-                lon_home_last = float(stad_dict[home_last]["lon"])
-                lat_home_team = float(stad_dict[home_team]["lat"])
-                lon_home_team = float(stad_dict[home_team]["lon"])
-                home_travel.append(haversine(lat_home_last, lon_home_last, lat_home_team, lon_home_team))
+    games["home_travel"] = pd.to_numeric(home_travel, errors="coerce") + 1e-6
+    games["vis_travel"] = pd.to_numeric(vis_travel, errors="coerce") + 1e-6
 
-                lat_vis_last = float(stad_dict[vis_last]["lat"])
-                lon_vis_last = float(stad_dict[vis_last]["lon"])
-                vis_travel.append(haversine(lat_vis_last, lon_vis_last, lat_home_team, lon_home_team))
-            except (KeyError, ValueError):
-                home_travel.append(np.nan)
-                vis_travel.append(np.nan)
-        else:
-            # Same series — no travel
-            home_travel.append(0.0)
-            vis_travel.append(0.0)
-
-    # --- Assign to DataFrame ---
-    games["home_travel"] = pd.Series(pd.to_numeric(home_travel, errors="coerce")).fillna(0.0)
-    games["vis_travel"] = pd.Series(pd.to_numeric(vis_travel, errors="coerce")).fillna(0.0)
-
-    # --- Log-transform ---
-    games["home_travel_log"] = np.log1p(games["home_travel"])
-    games["vis_travel_log"] = np.log1p(games["vis_travel"])
-
-    # --- Filter only valid travel rows and skip 0.0 both sides ---
+    # --- Filter only valid travel rows ---
     data_filtered = games[
-        ~((games["home_last_location"] == "N/A") | (games["visiting_last_location"] == "N/A")) &
-        ~((games["home_travel"] <= 1e-6) & (games["vis_travel"] <= 1e-6))
+        ~((games['home_last_location'] == "N/A") | (games['visiting_last_location'] == "N/A"))
     ].copy()
 
     # --- Prepare home and away rows ---
-    home_df = data_filtered[['game_id', 'hometeam', 'home_first_inning_runs', 'vis_ERA', 'home_travel_log']].rename(
-        columns={
-            'hometeam': 'team_id',
-            'home_first_inning_runs': 'first_inning_runs',
-            'vis_ERA': 'opp_ERA',
-            'home_travel_log': 'travel'
-        }
+    home_df = data_filtered[['game_id', 'hometeam', 'home_first_inning_runs', 'vis_ERA', 'home_travel']].rename(
+        columns={'hometeam': 'team_id',
+                 'home_first_inning_runs': 'first_inning_runs',
+                 'vis_ERA': 'opp_ERA',
+                 'home_travel': 'travel'}
     )
     home_df['is_home'] = 1
 
-    away_df = data_filtered[['game_id', 'visteam', 'visiting_first_inning_runs', 'home_ERA', 'vis_travel_log']].rename(
-        columns={
-            'visteam': 'team_id',
-            'visiting_first_inning_runs': 'first_inning_runs',
-            'home_ERA': 'opp_ERA',
-            'vis_travel_log': 'travel'
-        }
+    away_df = data_filtered[['game_id', 'visteam', 'visiting_first_inning_runs', 'home_ERA', 'vis_travel']].rename(
+        columns={'visteam': 'team_id',
+                 'visiting_first_inning_runs': 'first_inning_runs',
+                 'home_ERA': 'opp_ERA',
+                 'vis_travel': 'travel'}
     )
     away_df['is_home'] = 0
 
-    # --- Combine ---
     data_nb = pd.concat([home_df, away_df], ignore_index=True)
     data_nb = data_nb.dropna(subset=['first_inning_runs', 'opp_ERA', 'travel'])
 
@@ -163,6 +134,7 @@ for year in years:
         model = NegativeBinomial(y, X)
         result = model.fit(disp=False)
     except:
+        # fallback to Poisson
         poisson_model = sm.GLM(y, X, family=sm.families.Poisson())
         result = poisson_model.fit(cov_type='HC3')
 
@@ -199,6 +171,6 @@ for year in years:
 # --- Save all results ---
 if all_rows:
     pd.DataFrame(all_rows).to_csv(output_file, index=False)
-    print(f"\n Results saved to {output_file}")
+    print(f"\nResults saved to {output_file}")
 else:
     print("No results to save")
