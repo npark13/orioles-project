@@ -45,7 +45,7 @@ for year in years:
         print(f"Skipping {year} — file not found: {game_file}")
         continue
 
-    print(f"\n📂 Processing {year}")
+    print(f"\nProcessing {year}")
     games = pd.read_csv(game_file)
 
     # --- Extract date and sort ---
@@ -109,7 +109,7 @@ for year in years:
     teams = sorted(set(games["hometeam"]).union(set(games["visteam"])))
 
     for team in teams:
-        team_games = games[(games["hometeam"] == team)].copy()
+        team_games = games[(games["visteam"] == team)].copy()
         if team_games.empty:
             continue
 
@@ -172,7 +172,7 @@ for year in years:
 
     # --- Save per-year CSV ---
     if results:
-        output_path = f"{output_dir}/first_inning_nb_results_home_{year}.csv"
+        output_path = f"{output_dir}/first_inning_nb_results_vis_{year}.csv"
         pd.DataFrame(results).to_csv(output_path, index=False)
         print(f"Saved {len(results)} teams → {output_path}")
     else:
