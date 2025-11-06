@@ -38,7 +38,8 @@ def haversine(lat1, lon1, lat2, lon2):
 all_rows = []
 
 for year in years:
-    game_file = f"/Users/kevinhe/orioles-project/data/out/{year}/first_inning_runs_with_era_{year}.csv"
+    year_folder = f"/Users/kevinhe/orioles-project/data/out/{year}"
+    game_file = f"{year_folder}/first_inning_runs_with_era_{year}.csv"
     if not os.path.exists(game_file):
         print(f"Skipping {year} — file not found: {game_file}")
         continue
@@ -102,7 +103,19 @@ for year in years:
         ~((games['home_last_location'] == "N/A") | (games['visiting_last_location'] == "N/A"))
     ].copy()
 
-    # --- Prepare home and away rows ---
+    # --- Save per-game data with ERA, score, and travel ---
+    per_game_output = f"{year_folder}/game_level_with_travel_{year}.csv"
+    cols_to_save = [
+        "game_id", "date", "hometeam", "visteam",
+        "home_first_inning_runs", "visiting_first_inning_runs",
+        "home_ERA", "vis_ERA",
+        "home_travel", "vis_travel",
+        "home_last_location", "visiting_last_location"
+    ]
+    data_filtered[cols_to_save].to_csv(per_game_output, index=False)
+    print(f"Saved per-game CSV: {per_game_output}")
+
+    # --- Prepare home and away rows for model ---
     home_df = data_filtered[['game_id', 'hometeam', 'home_first_inning_runs', 'vis_ERA', 'home_travel']].rename(
         columns={'hometeam': 'team_id',
                  'home_first_inning_runs': 'first_inning_runs',
@@ -168,9 +181,9 @@ for year in years:
     all_rows.append(row)
     print(f"Completed {year}")
 
-# --- Save all results ---
+# --- Save all yearly results ---
 if all_rows:
     pd.DataFrame(all_rows).to_csv(output_file, index=False)
     print(f"\nResults saved to {output_file}")
 else:
-    print("No results to save")
+    print("No results to save.")
