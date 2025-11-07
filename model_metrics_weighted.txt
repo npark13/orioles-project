@@ -1,0 +1,33 @@
+Weighted base (year decay): 0.9
+
+LOGISTIC REGRESSION (weighted by year):
+AUC=0.759  F1=0.511  PR-AUC=0.514  LogLoss=0.5936  TopK: k=699 (28.777%)  target≈28.777%  cutoff=0.568756
+True prevalence (test): 28.777%
+              precision    recall  f1-score   support
+
+           0      0.802     0.802     0.802      1730
+           1      0.511     0.511     0.511       699
+
+    accuracy                          0.718      2429
+   macro avg      0.657     0.657     0.657      2429
+weighted avg      0.718     0.718     0.718      2429
+
+Confusion matrix (LOGIT):
+[[1388  342]
+ [ 342  357]]
+
+XGB MODEL:
+AUC=0.756  F1=0.502  PR-AUC=0.503  LogLoss=0.4962  TopK: k=699 (28.777%)  target≈28.777%  cutoff=0.433275
+True prevalence (test): 28.777%
+              precision    recall  f1-score   support
+
+           0      0.799     0.799     0.799      1730
+           1      0.502     0.502     0.502       699
+
+    accuracy                          0.713      2429
+   macro avg      0.650     0.650     0.650      2429
+weighted avg      0.713     0.713     0.713      2429
+
+Confusion matrix (XGB):
+[[1382  348]
+ [ 348  351]]
