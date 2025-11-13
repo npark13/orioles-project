@@ -241,7 +241,6 @@ def main():
         if "home_first_inning_runs" in per_inning.columns:
             per_inning = per_inning.rename(columns={
                 "home_first_inning_runs": "home_r1",
-                "visiting_first_inning_runs": "vis_r1",  # optional feature
                 "home_era": "home_starter_era",          # align naming
             })
             print("[DEBUG] Renamed home_first_inning_runs → home_r1")
@@ -254,7 +253,6 @@ def main():
 
     # list any extra rolling-avg / context columns you want as features
     extra_cols = [
-        "vis_r1",
         "vis_era",
         "home_travel",
         "vis_travel",
@@ -273,10 +271,8 @@ def main():
     )
 
     # binary target: did either team score at least 1 run in the 1st?
-    df["first_inning_any"] = (
-        (df["home_r1"].fillna(0) > 0) |
-        (df["vis_r1"].fillna(0) > 0)
-    ).astype(int)
+    df["home_scores_1st"] = (df["home_r1"].fillna(0) > 0).astype(int)
+
 
     # force extras to numeric (in case of stray strings)
     for c in present_extra:
@@ -342,7 +338,7 @@ def main():
         features_num.remove("home_starter_era")
 
     # add any rolling_avg numeric columns that made it through the merge
-    for extra in ["vis_r1",
+    for extra in [
                 "vis_era",
                 "home_travel",
                 "vis_travel",
@@ -356,7 +352,7 @@ def main():
 
     features_cat = ["tz_dir","hometeam"]
     keep_cols = list(dict.fromkeys(
-    ["game_id","date","hometeam","visteam","first_inning_any"] + features_num + features_cat
+    ["game_id","date","hometeam","visteam","home_scores_1st"] + features_num + features_cat
     )) 
     model_df = df[keep_cols].copy().loc[:, ~df[keep_cols].columns.duplicated()]
     model_df.to_csv(outdir / "modeling_dataset_weighted.csv", index=False)
@@ -372,7 +368,7 @@ def main():
         test_idx  = ~train_idx
 
     X = model_df[features_num + features_cat]
-    y = model_df["first_inning_any"].astype(int).values
+    y = model_df["home_scores_1st"].astype(int).values
 
     if test_idx.sum() == 0:
         X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)
