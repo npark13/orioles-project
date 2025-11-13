@@ -272,8 +272,11 @@ def main():
         how="left"
     )
 
-    # binary target: did the home team score at least 1 run in the 1st?
-    df["home_scores_1st"] = (df["home_r1"].fillna(0) > 0).astype(int)
+    # binary target: did either team score at least 1 run in the 1st?
+    df["first_inning_any"] = (
+        (df["home_r1"].fillna(0) > 0) |
+        (df["vis_r1"].fillna(0) > 0)
+    ).astype(int)
 
     # force extras to numeric (in case of stray strings)
     for c in present_extra:
@@ -328,7 +331,7 @@ def main():
             print("✓ Added recent form feature")
 
     # 5) clean & feature table
-    df = df.dropna(subset=["home_scores_1st"])
+    df = df.dropna(subset=["home_r1"])
     df["visitor_travel_km"] = df["visitor_travel_km"].fillna(0).clip(0, 6000)
     df["rest_hours_since_last"] = df["rest_hours_since_last"].fillna(48).clip(0, 168)
     df["umpire_bias_index"] = df["umpire_bias_index"].fillna(0).clip(-1, 1)
@@ -353,8 +356,8 @@ def main():
 
     features_cat = ["tz_dir","hometeam"]
     keep_cols = list(dict.fromkeys(
-        ["game_id","date","hometeam","visteam","home_scores_1st"] + features_num + features_cat
-    ))
+    ["game_id","date","hometeam","visteam","first_inning_any"] + features_num + features_cat
+    )) 
     model_df = df[keep_cols].copy().loc[:, ~df[keep_cols].columns.duplicated()]
     model_df.to_csv(outdir / "modeling_dataset_weighted.csv", index=False)
 
@@ -369,7 +372,7 @@ def main():
         test_idx  = ~train_idx
 
     X = model_df[features_num + features_cat]
-    y = model_df["home_scores_1st"].astype(int).values
+    y = model_df["first_inning_any"].astype(int).values
 
     if test_idx.sum() == 0:
         X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)
@@ -454,6 +457,11 @@ def main():
 
     proba_b = boost.predict_proba(X_te)[:, 1]
     pred_b, cut_b, k_b, tgt_rate_b, got_rate_b = topk_mask_by_rank(y_te, proba_b, lo=0.25, hi=0.35)
+   
+    import joblib
+    joblib.dump(logit, "logit_pipeline.joblib")
+    joblib.dump(boost, "boost_pipeline.joblib")
+
     # after: pred_b, cut_b, k_b, tgt_rate_b, got_rate_b = topk_mask_by_rank(...)
     print(f"[DEBUG] {boost_name.upper():>5}  target_rate={tgt_rate_b:.3f}  k={k_b}  got_rate={got_rate_b:.3f}  cutoff={cut_b:.6f}")
     assert 0.0 < got_rate_b < 1.0, f"{boost_name.upper()} degenerate got_rate={got_rate_b:.3f}"
@@ -500,10 +508,10 @@ def main():
     # 11) save predictions
     test_frame = model_df.loc[X_te.index, ["game_id","date","hometeam","visteam"]].copy()
     test_frame["y_true"]      = y_te
-    test_frame["p_logit"]     = proba_l
-    test_frame["p_boost"]     = proba_b
     test_frame["pred_logit"]  = pred_l.astype(np.uint8)
     test_frame["pred_boost"]  = pred_b.astype(np.uint8)
+    test_frame["p_logit"]     = proba_l
+    test_frame["p_boost"]     = proba_b
     test_frame["thr_logit"]   = cut_l
     test_frame["thr_boost"]   = cut_b
     test_frame.to_csv(outdir / "predictions_logit.csv", index=False)
