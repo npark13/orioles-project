@@ -219,13 +219,67 @@ def main():
     games = load_games_range(root / args.games_root, args.start, args.end)
     games = attach_travel_features(games)
 
-    # 2) target from per-inning
-    per_inning = pd.read_csv(root / args.per_inning)
+        # 2) target from per-inning
+    per_inning = pd.read_csv(
+        root / args.per_inning,
+        engine="python",
+        on_bad_lines="warn"  # skip malformed rows, warn instead of crashing
+    )
+
+    # normalize column names
     per_inning.columns = [c.lower() for c in per_inning.columns]
-    if not {"game_id","home_r1"}.issubset(per_inning.columns):
-        raise SystemExit("per-inning file must include: game_id, home_R1")
-    df = games.merge(per_inning[["game_id","home_r1"]], on="game_id", how="left")
+
+    # we MUST have game_id for merging
+    if "game_id" not in per_inning.columns:
+        raise SystemExit(
+            "per-inning / rolling_avg file is missing 'game_id'.\n"
+            f"Columns present: {per_inning.columns.tolist()}"
+        )
+
+    # Handle your schema: home_first_inning_runs → home_r1
+    if "home_r1" not in per_inning.columns:
+        if "home_first_inning_runs" in per_inning.columns:
+            per_inning = per_inning.rename(columns={
+                "home_first_inning_runs": "home_r1",
+                "visiting_first_inning_runs": "vis_r1",  # optional feature
+                "home_era": "home_starter_era",          # align naming
+            })
+            print("[DEBUG] Renamed home_first_inning_runs → home_r1")
+        else:
+            raise SystemExit(
+                "per-inning / rolling_avg file must include either 'home_r1' "
+                "or 'home_first_inning_runs'.\n"
+                f"Got columns: {per_inning.columns.tolist()}"
+            )
+
+    # list any extra rolling-avg / context columns you want as features
+    extra_cols = [
+        "vis_r1",
+        "vis_era",
+        "home_travel",
+        "vis_travel",
+        "home_avg_prev",
+        "away_avg_prev",
+        "home_obp",
+        "away_obp",
+    ]
+    present_extra = [c for c in extra_cols if c in per_inning.columns]
+
+    # merge onto games: always include game_id + home_r1 + any extras that exist
+    df = games.merge(
+        per_inning[["game_id", "home_r1"] + present_extra],
+        on="game_id",
+        how="left"
+    )
+
+    # binary target: did the home team score at least 1 run in the 1st?
     df["home_scores_1st"] = (df["home_r1"].fillna(0) > 0).astype(int)
+
+    # force extras to numeric (in case of stray strings)
+    for c in present_extra:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+
+
 
     # 3) optional: umpire bias
     if args.umpire_index:
@@ -283,6 +337,19 @@ def main():
     features_num = ["visitor_travel_km","rest_hours_since_last","umpire_bias_index","home_starter_era", "home_recent_form"]
     if "home_starter_era" in df.columns and df["home_starter_era"].isna().all():
         features_num.remove("home_starter_era")
+
+    # add any rolling_avg numeric columns that made it through the merge
+    for extra in ["vis_r1",
+                "vis_era",
+                "home_travel",
+                "vis_travel",
+                "home_avg_prev",
+                "away_avg_prev",
+                "home_obp",
+                "away_obp"]:
+        if extra in df.columns and extra not in features_num:
+            features_num.append(extra)
+
 
     features_cat = ["tz_dir","hometeam"]
     keep_cols = list(dict.fromkeys(

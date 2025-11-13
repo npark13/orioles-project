@@ -1,33 +1,33 @@
 Weighted base (year decay): 0.9
 
 LOGISTIC REGRESSION (weighted by year):
-AUC=0.759  F1=0.511  PR-AUC=0.514  LogLoss=0.5936  TopK: k=699 (28.777%)  target≈28.777%  cutoff=0.568756
-True prevalence (test): 28.777%
+AUC=0.781  F1=0.567  PR-AUC=0.579  LogLoss=0.5809  TopK: k=693 (28.530%)  target≈28.530%  cutoff=0.588750
+True prevalence (test): 28.530%
               precision    recall  f1-score   support
 
-           0      0.802     0.802     0.802      1730
-           1      0.511     0.511     0.511       699
+           0      0.827     0.827     0.827      1736
+           1      0.567     0.567     0.567       693
 
-    accuracy                          0.718      2429
-   macro avg      0.657     0.657     0.657      2429
-weighted avg      0.718     0.718     0.718      2429
+    accuracy                          0.753      2429
+   macro avg      0.697     0.697     0.697      2429
+weighted avg      0.753     0.753     0.753      2429
 
 Confusion matrix (LOGIT):
-[[1388  342]
- [ 342  357]]
+[[1436  300]
+ [ 300  393]]
 
 XGB MODEL:
-AUC=0.756  F1=0.502  PR-AUC=0.503  LogLoss=0.4962  TopK: k=699 (28.777%)  target≈28.777%  cutoff=0.433275
-True prevalence (test): 28.777%
+AUC=0.811  F1=0.570  PR-AUC=0.694  LogLoss=0.4389  TopK: k=693 (28.530%)  target≈28.530%  cutoff=0.281815
+True prevalence (test): 28.530%
               precision    recall  f1-score   support
 
-           0      0.799     0.799     0.799      1730
-           1      0.502     0.502     0.502       699
+           0      0.828     0.828     0.828      1736
+           1      0.570     0.570     0.570       693
 
-    accuracy                          0.713      2429
-   macro avg      0.650     0.650     0.650      2429
-weighted avg      0.713     0.713     0.713      2429
+    accuracy                          0.755      2429
+   macro avg      0.699     0.699     0.699      2429
+weighted avg      0.755     0.755     0.755      2429
 
 Confusion matrix (XGB):
-[[1382  348]
- [ 348  351]]
+[[1438  298]
+ [ 298  395]]
