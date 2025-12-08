@@ -147,7 +147,6 @@ for year in years:
         model = NegativeBinomial(y, X)
         result = model.fit(disp=False)
     except:
-        # fallback to Poisson
         poisson_model = sm.GLM(y, X, family=sm.families.Poisson())
         result = poisson_model.fit(cov_type='HC3')
 
@@ -156,12 +155,12 @@ for year in years:
     beta_opp_era = result.params['opp_ERA']
     beta_travel = result.params['travel']
 
-    mean_era = data_nb['opp_ERA'].mean()
-    mean_travel_home = data_nb.loc[data_nb['is_home'] == 1, 'travel'].mean()
-    mean_travel_away = data_nb.loc[data_nb['is_home'] == 0, 'travel'].mean()
+    # --- Compute mean ERA and travel separately, same for home & away ---
+    mean_ERA = data_nb['opp_ERA'].mean()
+    mean_travel = data_nb['travel'].mean()
 
-    mu_home = np.exp(intercept + beta_home + beta_opp_era * mean_era + beta_travel * mean_travel_home)
-    mu_away = np.exp(intercept + beta_opp_era * mean_era + beta_travel * mean_travel_away)
+    mu_home = np.exp(intercept + beta_home + beta_opp_era * mean_ERA + beta_travel * mean_travel)
+    mu_away = np.exp(intercept + beta_opp_era * mean_ERA + beta_travel * mean_travel)
     home_advantage = mu_home - mu_away
 
     row = {
@@ -170,9 +169,8 @@ for year in years:
         'beta_home': beta_home,
         'beta_opp_era': beta_opp_era,
         'beta_travel': beta_travel,
-        'mean_opp_ERA': mean_era,
-        'mean_travel_home': mean_travel_home,
-        'mean_travel_away': mean_travel_away,
+        'mean_opp_ERA': mean_ERA,
+        'mean_travel': mean_travel,
         'mu_away': mu_away,
         'mu_home': mu_home,
         'home_advantage': home_advantage
