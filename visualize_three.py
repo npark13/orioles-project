@@ -35,7 +35,7 @@ axes[0].plot(df_plot['year'], df_plot['home_advantage_only'], marker='o', label=
 axes[0].plot(df_plot['year'], df_plot['home_advantage_era'], marker='s', label='Home Advantage + ERA')
 axes[0].plot(df_plot['year'], df_plot['home_advantage_era_travel'], marker='^', label='Home Advantage + ERA + Travel')
 axes[0].set_ylabel("Estimated Home Advantage (Runs)")
-axes[0].set_title("MLB First-Inning Home Advantage: 2014-2024 (Only first games of series)")
+axes[0].set_title("MLB First-Inning Home Advantage: 2014-2024")
 axes[0].grid(True, linestyle='--', alpha=0.5)
 axes[0].legend()
 
@@ -45,7 +45,7 @@ axes[1].plot(df_plot['year'], df_plot['era_diff'], marker='s', label='ERA Adjust
 axes[1].plot(df_plot['year'], df_plot['era_travel_diff'], marker='^', label='ERA + Travel Adjusted Difference')
 axes[1].set_xlabel("Year")
 axes[1].set_ylabel("Difference from Home Advantage Only (Runs)")
-axes[1].set_title("MLB First-Inning Home Advantage Differences: 2014-2024 (Only first games of series)")
+axes[1].set_title("MLB First-Inning Home Advantage Differences: 2014-2024")
 axes[1].grid(True, linestyle='--', alpha=0.5)
 axes[1].legend()
 
