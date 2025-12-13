@@ -16,7 +16,11 @@ years = range(2014, 2025)
 
 # --- File paths ---
 stadium_file = "/Users/kevinhe/orioles-project/data/stadiums.csv"
-output_file = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_with_travel.csv"
+output_file_travel = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_with_travel.csv"
+output_file_no_travel = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results.csv"
+output_file_travel_openers = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_with_travel_openers.csv"
+output_file_no_travel_openers = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_openers.csv"
+opener_master_csv = "/Users/kevinhe/orioles-project/data/out/all_series_opener_game_ids.csv"
 
 if not os.path.exists(stadium_file):
     print(f"Stadium file not found: {stadium_file}")
@@ -34,9 +38,14 @@ def haversine(lat1, lon1, lat2, lon2):
     a = sin(dphi/2)**2 + cos(phi1)*cos(phi2)*sin(dlambda/2)**2
     return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
-# --- Loop over years ---
-all_rows = []
+# --- Prepare storage ---
+all_rows_travel = []
+all_rows_no_travel = []
+all_rows_travel_openers = []
+all_rows_no_travel_openers = []
+all_opener_game_ids = []
 
+# --- Loop over years ---
 for year in years:
     year_folder = f"/Users/kevinhe/orioles-project/data/out/{year}"
     game_file = f"{year_folder}/first_inning_runs_with_era_{year}.csv"
@@ -46,8 +55,6 @@ for year in years:
 
     print(f"\nProcessing {year}")
     games = pd.read_csv(game_file)
-
-    # --- Extract game dates ---
     games["date"] = games["game_id"].apply(lambda x: pd.to_datetime(x[3:11], format="%Y%m%d"))
     games = games.sort_values("date").reset_index(drop=True)
 
@@ -55,22 +62,17 @@ for year in years:
     games["home_last_location"] = "N/A"
     games["visiting_last_location"] = "N/A"
     last_location = {}
-
     for idx, row in games.iterrows():
-        home = row["hometeam"]
-        away = row["visteam"]
-
+        home, away = row["hometeam"], row["visteam"]
         if home in last_location:
             games.at[idx, "home_last_location"] = last_location[home]
         last_location[home] = home
-
         if away in last_location:
             games.at[idx, "visiting_last_location"] = last_location[away]
         last_location[away] = home
 
     # --- Compute travel distances ---
     home_travel, vis_travel = [], []
-
     for _, row in games.iterrows():
         home_last = row["home_last_location"]
         vis_last = row["visiting_last_location"]
@@ -98,90 +100,86 @@ for year in years:
     games["home_travel"] = pd.to_numeric(home_travel, errors="coerce") + 1e-6
     games["vis_travel"] = pd.to_numeric(vis_travel, errors="coerce") + 1e-6
 
-    # --- Filter only valid travel rows ---
-    data_filtered = games[
-        ~((games['home_last_location'] == "N/A") | (games['visiting_last_location'] == "N/A"))
-    ].copy()
+    # --- Filter valid rows ---
+    valid_games = games[~((games['home_last_location'] == "N/A") | (games['visiting_last_location'] == "N/A"))].copy()
 
-    # --- Save per-game data with ERA, score, and travel ---
-    per_game_output = f"{year_folder}/game_level_with_travel_{year}.csv"
-    cols_to_save = [
-        "game_id", "date", "hometeam", "visteam",
-        "home_first_inning_runs", "visiting_first_inning_runs",
-        "home_ERA", "vis_ERA",
-        "home_travel", "vis_travel",
-        "home_last_location", "visiting_last_location"
-    ]
-    data_filtered[cols_to_save].to_csv(per_game_output, index=False)
-    print(f"Saved per-game CSV: {per_game_output}")
+    # --- Identify series openers ---
+    valid_games = valid_games.sort_values(['hometeam','date']).reset_index(drop=True)
+    valid_games["is_series_opener"] = True
+    last_home_game = {}
+    for idx, row in valid_games.iterrows():
+        home, away = row['hometeam'], row['visteam']
+        last_opponent = last_home_game.get(home, None)
+        if last_opponent == away:
+            valid_games.at[idx, 'is_series_opener'] = False
+        last_home_game[home] = away
 
-    # --- Prepare home and away rows for model ---
-    home_df = data_filtered[['game_id', 'hometeam', 'home_first_inning_runs', 'vis_ERA', 'home_travel']].rename(
-        columns={'hometeam': 'team_id',
-                 'home_first_inning_runs': 'first_inning_runs',
-                 'vis_ERA': 'opp_ERA',
-                 'home_travel': 'travel'}
-    )
-    home_df['is_home'] = 1
+    valid_games['is_series_opener'] = valid_games['is_series_opener'].fillna(False)
+    openers = valid_games[valid_games['is_series_opener']]
 
-    away_df = data_filtered[['game_id', 'visteam', 'visiting_first_inning_runs', 'home_ERA', 'vis_travel']].rename(
-        columns={'visteam': 'team_id',
-                 'visiting_first_inning_runs': 'first_inning_runs',
-                 'home_ERA': 'opp_ERA',
-                 'vis_travel': 'travel'}
-    )
-    away_df['is_home'] = 0
+    # --- Save opener game_ids per year ---
+    opener_csv_year = f"{year_folder}/series_opener_game_ids_{year}.csv"
+    openers[['game_id']].to_csv(opener_csv_year, index=False)
+    all_opener_game_ids.extend(openers['game_id'].tolist())
 
-    data_nb = pd.concat([home_df, away_df], ignore_index=True)
-    data_nb = data_nb.dropna(subset=['first_inning_runs', 'opp_ERA', 'travel'])
+    # --- Save per-game CSVs ---
+    cols_no_travel = ["game_id","date","hometeam","visteam","home_first_inning_runs","visiting_first_inning_runs"]
+    valid_games[cols_no_travel].to_csv(f"{year_folder}/game_level_no_travel_{year}.csv", index=False)
+    openers[cols_no_travel].to_csv(f"{year_folder}/game_level_no_travel_openers_{year}.csv", index=False)
 
-    # --- Standardize predictors ---
-    for col in ['opp_ERA', 'travel']:
-        data_nb[col] = (data_nb[col] - data_nb[col].mean()) / data_nb[col].std()
+    # --- Fit NB models ---
+    def fit_nb(df, include_travel=False):
+        home_df = df[['game_id','hometeam','home_first_inning_runs','home_travel']].rename(
+            columns={'hometeam':'team_id','home_first_inning_runs':'first_inning_runs','home_travel':'travel'}
+        )
+        home_df['is_home'] = 1
+        away_df = df[['game_id','visteam','visiting_first_inning_runs','vis_travel']].rename(
+            columns={'visteam':'team_id','visiting_first_inning_runs':'first_inning_runs','vis_travel':'travel'}
+        )
+        away_df['is_home'] = 0
+        data = pd.concat([home_df, away_df], ignore_index=True)
 
-    # --- Fit Negative Binomial ---
-    X = sm.add_constant(data_nb[['is_home', 'opp_ERA', 'travel']])
-    y = data_nb['first_inning_runs']
-
-    try:
+        if include_travel:
+            data['travel'] = (data['travel'] - data['travel'].mean()) / data['travel'].std()
+            X = sm.add_constant(data[['is_home','travel']])
+        else:
+            X = sm.add_constant(data[['is_home']])
+        y = data['first_inning_runs']
         model = NegativeBinomial(y, X)
         result = model.fit(disp=False)
-    except:
-        poisson_model = sm.GLM(y, X, family=sm.families.Poisson())
-        result = poisson_model.fit(cov_type='HC3')
 
-    intercept = result.params['const']
-    beta_home = result.params['is_home']
-    beta_opp_era = result.params['opp_ERA']
-    beta_travel = result.params['travel']
+        intercept = result.params['const']
+        beta_home = result.params['is_home']
 
-    # --- Compute mean ERA and travel separately, same for home & away ---
-    mean_ERA = data_nb['opp_ERA'].mean()
-    mean_travel = data_nb['travel'].mean()
+        if include_travel:
+            beta_travel = result.params['travel']
+            mean_travel = data['travel'].mean()
+            mu_home = np.exp(intercept + beta_home + beta_travel * mean_travel)
+            mu_away = np.exp(intercept + beta_travel * mean_travel)
+            return {'intercept': intercept, 'beta_home': beta_home, 'beta_travel': beta_travel,
+                    'mean_travel': mean_travel, 'mu_away': mu_away, 'mu_home': mu_home,
+                    'home_advantage': mu_home - mu_away}
+        else:
+            mu_home = np.exp(intercept + beta_home)
+            mu_away = np.exp(intercept)
+            return {'intercept': intercept, 'beta_home': beta_home, 'mu_away': mu_away,
+                    'mu_home': mu_home, 'home_advantage': mu_home - mu_away}
 
-    mu_home = np.exp(intercept + beta_home + beta_opp_era * mean_ERA + beta_travel * mean_travel)
-    mu_away = np.exp(intercept + beta_opp_era * mean_ERA + beta_travel * mean_travel)
-    home_advantage = mu_home - mu_away
+    # --- All games NB ---
+    all_rows_no_travel.append({'year': year, **fit_nb(valid_games, include_travel=False)})
+    all_rows_travel.append({'year': year, **fit_nb(valid_games, include_travel=True)})
 
-    row = {
-        'year': year,
-        'intercept': intercept,
-        'beta_home': beta_home,
-        'beta_opp_era': beta_opp_era,
-        'beta_travel': beta_travel,
-        'mean_opp_ERA': mean_ERA,
-        'mean_travel': mean_travel,
-        'mu_away': mu_away,
-        'mu_home': mu_home,
-        'home_advantage': home_advantage
-    }
+    # --- Openers NB ---
+    all_rows_no_travel_openers.append({'year': year, **fit_nb(openers, include_travel=False)})
+    all_rows_travel_openers.append({'year': year, **fit_nb(openers, include_travel=True)})
 
-    all_rows.append(row)
-    print(f"Completed {year}")
+# --- Save all CSVs ---
+pd.DataFrame(all_rows_no_travel).to_csv(output_file_no_travel, index=False)
+pd.DataFrame(all_rows_travel).to_csv(output_file_travel, index=False)
+pd.DataFrame(all_rows_no_travel_openers).to_csv(output_file_no_travel_openers, index=False)
+pd.DataFrame(all_rows_travel_openers).to_csv(output_file_travel_openers, index=False)
 
-# --- Save all yearly results ---
-if all_rows:
-    pd.DataFrame(all_rows).to_csv(output_file, index=False)
-    print(f"\nResults saved to {output_file}")
-else:
-    print("No results to save.")
+# --- Save master opener game_ids CSV ---
+pd.DataFrame({'game_id': all_opener_game_ids}).to_csv(opener_master_csv, index=False)
+
+print("All four NB CSVs and series opener game_id CSVs saved successfully.")
