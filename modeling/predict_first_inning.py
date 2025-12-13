@@ -37,12 +37,8 @@ def main():
         logit = joblib.load(args.logit_pipeline)
         boost = joblib.load(args.boost_pipeline)
 
-<<<<<<< HEAD
         # Identify required features
         # Pipelines built with ColumnTransformer store the names in `feature_names_in_`
-=======
-        # 4️⃣ Identify required features
->>>>>>> 1cb2a45 (got sample data for nrfi)
         try:
             feature_cols = logit.named_steps["columntransformer"].feature_names_in_
         except Exception:
@@ -59,25 +55,10 @@ def main():
         merged_df["logit_prob_first_inning_score"] = logit.predict_proba(X)[:, 1]
         merged_df["boost_prob_first_inning_score"] = boost.predict_proba(X)[:, 1]
 
-<<<<<<< HEAD
         # Output results
         output_cols = ["game_id", "logit_prob_first_inning_score", "boost_prob_first_inning_score"]
         merged_df[output_cols].to_csv(args.out, index=False)
         print(f"Predictions saved to {args.out}")
-=======
-        # 6️⃣ Filter out extreme probabilities (>0.95 or <0.05)
-        mask = (
-            merged_df["logit_prob_first_inning_score"].between(0.05, 0.95) &
-            merged_df["boost_prob_first_inning_score"].between(0.05, 0.95)
-        )
-        filtered_df = merged_df[mask]
-        print(f"Filtered out {len(merged_df) - len(filtered_df)} games with extreme probabilities.")
-
-        # 7️⃣ Output results
-        output_cols = ["game_id", "logit_prob_first_inning_score", "boost_prob_first_inning_score"]
-        filtered_df[output_cols].to_csv(args.out, index=False)
-        print(f"✅ Filtered predictions saved to {args.out}")
->>>>>>> 1cb2a45 (got sample data for nrfi)
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
