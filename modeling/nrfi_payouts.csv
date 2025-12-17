@@ -1,0 +1,16 @@
+game_id,nrfi_odds,bet,logreg_pick,logreg_payout,xg_boost_pick,xg_boost_payout,mgm_pick,mgm_payout,result
+PIT202409140,100,10.0,yes,-10.0,yes,-10.0,no,10.0,no
+SFN202409140,-105,10.0,no,10.5,yes,-10.0,no,10.5,no
+CLE202409140,105,10.0,yes,10.5,yes,10.5,no,-10.0,yes
+SEA202409140,130,10.0,yes,13.0,yes,13.0,no,-10.0,yes
+TOR202409140,105,10.0,yes,10.5,yes,10.5,no,-10.0,yes
+COL202409140,-150,10.0,yes,-10.0,yes,-10.0,no,15.0,no
+DET202409140,100,10.0,no,-10.0,no,-10.0,no,-10.0,yes
+ATL202409140,110,10.0,yes,-10.0,yes,-10.0,no,9.09,no
+ANA202409140,-105,10.0,no,10.5,no,10.5,no,10.5,no
+MIN202409140,-105,10.0,yes,-10.0,yes,-10.0,no,10.5,no
+NYA202409140,-105,10.0,yes,9.52,yes,9.52,yes,9.52,yes
+WAS202409140,-115,10.0,no,-10.0,yes,8.7,no,-10.0,yes
+ARI202409140,-105,10.0,no,10.5,yes,-10.0,yes,-10.0,no
+PHI202409140,-105,10.0,no,10.5,yes,-10.0,no,10.5,no
+CHA202409140,-105,10.0,yes,9.52,yes,9.52,no,-10.0,yes
