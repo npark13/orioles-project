@@ -171,7 +171,7 @@ def correlation(root: str, out_csv: str):
             print(f"[WARN] Cannot determine year from folder {f.parent}. Skipping {f}.")
             continue
 
-        # Include only years 1909–2013
+        # Include only years 2013-2024
         if year < 2013 or year > 2024:
             continue
 

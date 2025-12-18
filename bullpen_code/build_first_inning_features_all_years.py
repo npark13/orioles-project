@@ -1,6 +1,5 @@
 # build_first_inning_features_all_years.py
 # Outputs:
-#   yearly_features/features_<YEAR>.csv
 #   first_inning_features_all.csv
 #
 # For each game (multi-season):
@@ -215,7 +214,7 @@ def run(years: Iterable[int]) -> pd.DataFrame:
         raise SystemExit("No seasons processed — nothing to write.")
 
     full = pd.concat(all_parts, ignore_index=True)
-    full.to_csv("first_inning_features_all.csv", index=False)
+    full.to_csv("csv_files/first_inning_features_all.csv", index=False)
     print(f"[ALL] Combined games: {len(full)}")
     print("[ALL] Wrote first_inning_features_all.csv")
     return full
