@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import argparse
 
-def plot_runs_per_inning(df, save_path="runs_per_inning.png"):
+def plot_runs_per_inning(df, save_path="all_visuals/retrosheet_remake_visuals/runs_per_inning.png"):
     # Drop rows w/o the needed data
     df = df.dropna(subset=["inning", "visitor_avg_runs", "home_avg_runs", "games"])
     
@@ -38,7 +38,7 @@ def plot_runs_per_inning(df, save_path="runs_per_inning.png"):
     plt.show()
 
 
-def home_versus_visiting_inning(df, save_path="home_versus_visiting_inning.png"):
+def home_versus_visiting_inning(df, save_path="all_visuals/retrosheet_remake_visuals/home_versus_visiting_inning.png"):
     # Drop rows w/o the needed data
     df = df.dropna(subset=["inning", "visitor_avg_runs", "home_avg_runs", "games"])
     
@@ -71,7 +71,7 @@ def home_versus_visiting_inning(df, save_path="home_versus_visiting_inning.png")
     plt.savefig(save_path)
     plt.show()
 
-def plot_differential_runs_per_inning(df, save_path="differential_runs_per_inning.png"):
+def plot_differential_runs_per_inning(df, save_path="all_visuals/retrosheet_remake_visuals/differential_runs_per_inning.png"):
     # Drop rows w/o the needed data
     df = df.dropna(subset=["inning", "visitor_avg_runs", "home_avg_runs", "games"])
     
@@ -102,7 +102,7 @@ def plot_differential_runs_per_inning(df, save_path="differential_runs_per_innin
     plt.savefig(save_path)
     plt.show()
 
-def plot_differential_runs_first_inning(df, save_path="differential_runs_first_inning.png"):
+def plot_differential_runs_first_inning(df, save_path="all_visuals/retrosheet_remake_visuals/home_minus_vis_plot.png"):
     if "home_minus_vis_runs" not in df.columns or "year" not in df.columns:
         print("Skipping plot_differential_runs_first_inning: required columns missing.")
         return
@@ -142,28 +142,7 @@ def plot_differential_runs_first_inning(df, save_path="differential_runs_first_i
     plt.savefig(save_path)
     plt.show()
 
-
-def plot_home_vs_visitor_first_inning_line(df, save_path="home_vs_visitor_first_inning.png"):
-    # Find the right columns for x (visitor) and y (home first-inning)
-    col_x = next((c for c in df.columns if "visitor" in c.lower()), None)
-    col_y = next((c for c in df.columns if "home" in c.lower() and "first" in c.lower()), None)
-
-    if col_x is None or col_y is None:
-        print("Skipping plot_home_vs_visitor_first_inning_line: required columns missing.")
-        return
-
-    # Plot the correlation
-    plt.figure(figsize=(8, 5))
-    plt.plot(df[col_x], df[col_y], linestyle="-", marker="o")
-    plt.xlabel("Visitor Runs in First Inning")
-    plt.ylabel("Average Home Team Runs in First Inning")
-    plt.title("Correlation of Home Scoring and Visitor Scoring")
-    plt.grid(True, linestyle="--", alpha=0.5)
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.show()
-
-def plot_first_inning_diff_by_decade(df, save_path="first_inning_diff_by_decade.png"):
+def plot_first_inning_diff_by_decade(df, save_path="all_visuals/retrosheet_remake_visuals/first_inning_diff_by_decade.png"):
     """
     Aggregates per-year first-inning stats by decade using games as weights,
     then plots:
@@ -200,7 +179,7 @@ def plot_first_inning_diff_by_decade(df, save_path="first_inning_diff_by_decade.
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
 
-def plot_first_inning_summary_by_decade(df, save_path="first_inning_summary_by_decade.png"):
+def plot_first_inning_summary_by_decade(df, save_path="all_visuals/retrosheet_remake_visuals/first_inning_summary_by_decade.png"):
     """
     Aggregates per-year first-inning stats by decade using games as weights,
     then plots:
@@ -286,9 +265,6 @@ def main():
 
     # 3. First-inning differential per year (2013–2024)
     plot_differential_runs_first_inning(df_2)
-
-    # 4. Scatter: home vs visitor first-inning
-    plot_home_vs_visitor_first_inning_line(df_3)
 
 if __name__ == "__main__":
     main()
