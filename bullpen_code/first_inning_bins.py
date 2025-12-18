@@ -7,9 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-IN = "first_inning_features_with_tempo_all.csv"   # built earlier
-OUT_CSV = "binned_first_inning_stats.csv"
-OUT_PNG = "binned_first_inning_stats.png"
+IN = Path("csv_files") / "first_inning_features_with_tempo_all.csv"
+OUT_CSV = Path("csv_files") / "binned_first_inning_stats.csv"
+OUT_PNG = Path("all_visuals/bullpen_cooldown_visuals") / "binned_first_inning_stats.png"
+
+OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
+OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
 
 # --- Load
 df = pd.read_csv(IN)

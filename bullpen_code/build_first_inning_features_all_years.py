@@ -209,10 +209,6 @@ def run(years: Iterable[int]) -> pd.DataFrame:
         feats = build_features_from_raw(sc, y)
         print(f"[{y}] Games extracted: {len(feats)}")
 
-        out_y = f"yearly_features/features_{y}.csv"
-        feats.to_csv(out_y, index=False)
-        print(f"[{y}] Wrote {out_y}")
-
         all_parts.append(feats)
 
     if not all_parts:

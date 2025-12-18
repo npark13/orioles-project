@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
+import argparse
 
 def plot_runs_per_inning(df, save_path="runs_per_inning.png"):
     # Drop rows w/o the needed data
@@ -251,10 +253,17 @@ def plot_first_inning_summary_by_decade(df, save_path="first_inning_summary_by_d
 
 
 def main():
-    # File paths for the CSVs
-    csv_path = "/Users/kevinhe/orioles-project/data/out/inning_summary.csv"
-    csv_path_two = "/Users/kevinhe/orioles-project/data/out/first_inning_summary.csv"
-    csv_path_three = "/Users/kevinhe/orioles-project/data/out/visitor_vs_home_first_inning.csv"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--outdir", default="all_visuals/retrosheet_remake_visuals")
+    args = ap.parse_args()
+
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    csv_path = "data/out/inning_summary.csv"
+    csv_path_two = "data/out/first_inning_summary.csv"
+    csv_path_three = "data/out/visitor_vs_home_first_inning.csv"
+
 
     # Load the data
     df = pd.read_csv(csv_path)      # inning-level data

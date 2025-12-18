@@ -3,20 +3,20 @@ Weighted base (year decay): 0.9
 Fixed classification threshold: 0.50
 
 LOGISTIC REGRESSION (weighted by year):
-AUC=0.671  F1=0.595  PR-AUC=0.649  LogLoss=0.6454  Predicted+=43.804%
+AUC=0.671  F1=0.594  PR-AUC=0.649  LogLoss=0.6453  Predicted+=43.597%
 True prevalence (test): 46.705%
               precision    recall  f1-score   support
 
-           0      0.648     0.684     0.665      1286
-           1      0.615     0.577     0.595      1127
+           0      0.647     0.685     0.666      1286
+           1      0.615     0.574     0.594      1127
 
-    accuracy                          0.634      2413
-   macro avg      0.632     0.630     0.630      2413
-weighted avg      0.633     0.634     0.633      2413
+    accuracy                          0.633      2413
+   macro avg      0.631     0.630     0.630      2413
+weighted avg      0.632     0.633     0.632      2413
 
 Confusion matrix (LOGIT):
-[[879 407]
- [477 650]]
+[[881 405]
+ [480 647]]
 
 XGB MODEL:
 AUC=0.689  F1=0.578  PR-AUC=0.700  LogLoss=0.6171  Predicted+=38.251%

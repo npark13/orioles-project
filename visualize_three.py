@@ -59,30 +59,5 @@ plt.xticks(years, rotation=45)
 plt.tight_layout()
 plt.savefig("/Users/kevinhe/orioles-project/home_advantage_travel_all_games.png", dpi=300)
 plt.close()
-print("Figure for all games saved.")
 
-# ---------------------
-# Figure 2: Series Openers
-# ---------------------
-fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10,8), sharex=True)
-
-axes[0].plot(df_openers['year'], df_openers['home_advantage'], marker='o', label='Just Home Advantage')
-axes[0].plot(df_openers['year'], df_openers['home_advantage_travel'], marker='^', label='Home Advantage + Travel')
-axes[0].set_ylabel("Estimated Home Advantage (Runs)")
-axes[0].set_title("MLB First-Inning Home Advantage: Series Openers 2014-2024")
-axes[0].grid(True, linestyle='--', alpha=0.5)
-axes[0].legend()
-
-axes[1].plot(df_openers['year'], [0]*len(df_openers), marker='o', linestyle='--', label='Baseline: Just Home Advantage')
-axes[1].plot(df_openers['year'], df_openers['travel_diff'], marker='^', label='Travel Adjusted Difference')
-axes[1].set_xlabel("Year")
-axes[1].set_ylabel("Difference from Home Advantage Only (Runs)")
-axes[1].set_title("MLB First-Inning Home Advantage Differences: Series Openers 2014-2024")
-axes[1].grid(True, linestyle='--', alpha=0.5)
-axes[1].legend()
-
-plt.xticks(years, rotation=45)
-plt.tight_layout()
-plt.savefig("/Users/kevinhe/orioles-project/home_advantage_travel_openers.png", dpi=300)
-plt.close()
-print("Figure for series openers saved.")
+print(f"Combined plot saved to {outpath}")

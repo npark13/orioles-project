@@ -1,9 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-SRC = "binned_first_inning_stats.csv"          # the file you already have
-OUT_CSV = "binned_first_inning_stats_with_escape.csv"
-OUT_PNG = "visitor_escape_bins.png"
+SRC = "csv_files/binned_first_inning_stats.csv"
+OUT_CSV = "csv_files/binned_first_inning_stats_with_escape.csv"
+OUT_PNG = Path("all_visuals/bullpen_cooldown_visuals") / "visitor_escape_bins.png"
+OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
 
 # 1) Load
 df = pd.read_csv(SRC)
