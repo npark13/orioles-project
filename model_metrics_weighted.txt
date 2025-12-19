@@ -1,35 +1,35 @@
-Target: yrfi
+Target: home
 Weighted base (year decay): 0.9
 Fixed classification threshold: 0.50
 
 LOGISTIC REGRESSION (weighted by year):
-AUC=0.523  F1=0.438  PR-AUC=0.495  LogLoss=0.6917  Predicted+=38.790%
-True prevalence (test): 46.705%
+AUC=0.547  F1=0.358  PR-AUC=0.333  LogLoss=0.6755  Predicted+=33.775%
+True prevalence (test): 28.719%
               precision    recall  f1-score   support
 
-           0      0.543     0.624     0.581      1286
-           1      0.483     0.401     0.438      1127
+           0      0.735     0.683     0.708      1720
+           1      0.331     0.390     0.358       693
 
-    accuracy                          0.520      2413
-   macro avg      0.513     0.512     0.509      2413
-weighted avg      0.515     0.520     0.514      2413
+    accuracy                          0.599      2413
+   macro avg      0.533     0.536     0.533      2413
+weighted avg      0.619     0.599     0.608      2413
 
 Confusion matrix (LOGIT):
-[[802 484]
- [675 452]]
+[[1175  545]
+ [ 423  270]]
 
 XGB MODEL:
-AUC=0.519  F1=0.501  PR-AUC=0.490  LogLoss=0.6989  Predicted+=51.720%
-True prevalence (test): 46.705%
+AUC=0.540  F1=0.038  PR-AUC=0.316  LogLoss=0.6039  Predicted+=1.823%
+True prevalence (test): 28.719%
               precision    recall  f1-score   support
 
-           0      0.543     0.492     0.517      1286
-           1      0.477     0.528     0.501      1127
+           0      0.713     0.983     0.827      1720
+           1      0.318     0.020     0.038       693
 
-    accuracy                          0.509      2413
-   macro avg      0.510     0.510     0.509      2413
-weighted avg      0.512     0.509     0.509      2413
+    accuracy                          0.706      2413
+   macro avg      0.516     0.501     0.432      2413
+weighted avg      0.600     0.706     0.600      2413
 
 Confusion matrix (XGB):
-[[633 653]
- [532 595]]
+[[1690   30]
+ [ 679   14]]
