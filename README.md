@@ -144,13 +144,41 @@ OUTPUTS:
 - team_home_edge_delta.csv
 - fringe_home_edge_delta.png
 
-7) MODELS 
+7) MODELS
+INPUTS:
+- data/out/<year>/first_inning_runs_with_era_<year>.csv (taken from Baseball Reference)
+- data/out/stadiums.csv (file containing stadium coordinates)
+COMMAND: python modeling/add_travel_to_first_inning_with_era.py
+OUTPUTS:
+- data/out/<year>/game_level_with_travel_<year>.csv (year-by-year)
+
+INPUTS: 
+- data/out/<year>/game_level_with_travel_<year>.csv (year-by-year)
+COMMAND: python modeling/rolling_averages.py
+OUTPUTS:
+- data/out/rolling_avg/game_level_with_rolling_avg_<year>.csv (year-by-year)
+
+INPUTS: 
+- data/out/rolling_avg/game_level_with_rolling_avg_<year>.csv (year-by-year)
+- data/out/2024/team_obp.csv (taken from TeamRankings.com)
+COMMAND: python modeling/obp_model.py
+Edits the csv, adding obp columns
+
+INPUTS:
+- data/out/rolling_avg/game_level_with_rolling_avg_<year>.csv
+COMMAND: python modeling/csv_aggregator.py
+OUTPUTS:
+- data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv
+
+INPUTS:
+- data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv
 COMMAND: python modeling/predict_first_inning_weighted.py \
-  --start 2013 --end 2024 \
-  --games-root data/out \
-  --per-inning data/out/rolling_avg/game_level_with_rolling_avg_weather_2014_2024_all_clean.csv \
-  --target yrfi \
-  --outdir .
+--start 2013 \
+--end 2024 \
+--games-root data/out \
+--per-inning data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv \
+--target yrfi \
+--outdir .
 OUTPUTS:
 - modeling_dataset_weighted.csv
 - model_metrics_weighted.txt
@@ -159,7 +187,10 @@ OUTPUTS:
 - calib_logit.png
 - calib_boost.png
 - feature_importances_boost.csv
+- predictions_logit.csv
 - predictions_boost.csv
+- logit_pipeline_yrfi.joblib
+- boost_pipeline_yrfi.joblib
 
 8) TEST CASES
 INPUTS:
@@ -168,10 +199,25 @@ INPUTS:
 - logit_pipeline.joblib
 - boost_pipeline.joblib
 COMMAND: python modeling/predict_first_inning.py \
-  --game-ids modeling/game_ids.csv \
-  --model-dataset modeling_dataset_weighted.csv \
-  --logit-pipeline logit_pipeline.joblib \
-  --boost-pipeline boost_pipeline.joblib \
-  --out modeling/first_inning_preds.csv
+--game-ids modeling/game_ids.csv \
+--model-dataset modeling_dataset_weighted.csv \
+--logit-pipeline logit_pipeline_yrfi.joblib \
+--boost-pipeline boost_pipeline_yrfi.joblib \
+--out modeling/first_inning_preds.csv
 OUTPUTS:
 - modeling/first_inning_preds.csv
+
+INPUTS:
+- modeling/game_ids.csv
+- modeling/first_inning_preds.csv
+- data/out/2024/first_inning_runs_summary_2024.csv
+- modeling/nrfi_payouts
+COMMAND: python modeling/check_accuracy.py \
+--game-ids modeling/game_ids.csv \
+--preds modeling/first_inning_preds.csv \
+--results data/out/2024/first_inning_runs_summary_2024.csv \
+--out-payouts modeling/nrfi_payouts.csv
+OUTPUTS:
+- Accuracy and Total Profit
+- nrfi_picks_with_result.csv
+- modeling/nrfi_payouts.csv
