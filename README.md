@@ -75,13 +75,6 @@ OUTPUTS:
 - csv_files/binned_first_inning_stats_with_escape.csv 
 - all_visuals/bullpen_cooldown_visuals/visitor_escape_bins.png
 
-
-INPUTS:
-pybaseball.statcast
-COMMAND: python bullpen_code/build_first_inning_features_all_years.py
-OUTPUTS:
-- csv_files/first_inning_features_all.csv
-
 4) TIMEZONE CHANGE
 INPUTS:
 - data/out/<year>/games.csv (per-year games)
