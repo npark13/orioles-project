@@ -84,3 +84,72 @@ def summarize_all_innings(out_root: Path) -> Path:
     out_df.to_csv(out_path, index=False)
     print(f"[OK] wrote {out_path}")
     return out_path
+
+def summarize_first_inning_summary(out_root: Path) -> Path:
+    """
+    Writes per-year first-inning summary to:
+      out_root / "first_inning_summary.csv"
+
+    Exact columns (and order):
+      games,visitor_avg_runs_1st,home_avg_runs_1st,visitor_p_scored_1st,home_p_scored_1st,
+      home_minus_vis_runs,home_minus_vis_prob,year
+    """
+    rows = []
+
+    for year_dir in sorted(out_root.glob("[12][0-9][0-9][0-9]")):
+        plays_csv = year_dir / "plays.csv"
+        if not plays_csv.exists():
+            continue
+
+        stats_list = summarize_year(plays_csv)
+        if not stats_list:
+            continue
+
+        first = next((r for r in stats_list if r.get("inning") == 1), None)
+        if not first:
+            continue
+
+        rows.append({
+            "games": first["games"],
+            "visitor_avg_runs_1st": first["visitor_avg_runs"],
+            "home_avg_runs_1st": first["home_avg_runs"],
+            "visitor_p_scored_1st": first["visitor_p_scored"],
+            "home_p_scored_1st": first["home_p_scored"],
+            "home_minus_vis_runs": first["home_minus_vis_runs"],
+            "home_minus_vis_prob": first["home_minus_vis_prob"],
+            "year": int(year_dir.name),
+        })
+
+    out_path = out_root / "first_inning_summary.csv"
+    if not rows:
+        print("[WARN] no first-inning summaries written")
+        # still create an empty file with the exact header, if you want:
+        pd.DataFrame(columns=[
+            "games",
+            "visitor_avg_runs_1st",
+            "home_avg_runs_1st",
+            "visitor_p_scored_1st",
+            "home_p_scored_1st",
+            "home_minus_vis_runs",
+            "home_minus_vis_prob",
+            "year",
+        ]).to_csv(out_path, index=False)
+        return out_path
+
+    df_out = pd.DataFrame(rows)
+
+    # enforce exact column order
+    df_out = df_out[[
+        "games",
+        "visitor_avg_runs_1st",
+        "home_avg_runs_1st",
+        "visitor_p_scored_1st",
+        "home_p_scored_1st",
+        "home_minus_vis_runs",
+        "home_minus_vis_prob",
+        "year",
+    ]].sort_values("year")
+
+    df_out.to_csv(out_path, index=False)
+    print(f"[OK] wrote {out_path}")
+    return out_path

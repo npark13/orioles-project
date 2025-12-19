@@ -5,6 +5,9 @@ from statsmodels.discrete.discrete_model import NegativeBinomial
 from math import radians, sin, cos, sqrt, atan2
 import os
 import warnings
+import argparse
+from pathlib import Path
+
 
 # --- Suppress warnings ---
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -14,21 +17,33 @@ warnings.filterwarnings("ignore", category=sm.tools.sm_exceptions.ConvergenceWar
 # --- Year range ---
 years = range(2014, 2025)
 
-# --- File paths ---
-stadium_file = "/Users/kevinhe/orioles-project/data/stadiums.csv"
-output_file_game_travel = "/Users/kevinhe/orioles-project/data/out/game_travel_distances.csv"
-output_file_travel = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_with_travel.csv"
-output_file_no_travel = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results.csv"
-output_file_travel_openers = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_with_travel_openers.csv"
-output_file_no_travel_openers = "/Users/kevinhe/orioles-project/data/out/first_inning_nb_results_openers.csv"
-opener_master_csv = "/Users/kevinhe/orioles-project/data/out/all_series_opener_game_ids.csv"
+# --- CLI / root paths ---
+ap = argparse.ArgumentParser()
+ap.add_argument("--out_root", default="data/out", help="Path to data/out (contains year folders)")
+args = ap.parse_args()
 
-# --- Check stadium file ---
-if not os.path.exists(stadium_file):
-    print(f"Stadium file not found: {stadium_file}")
-    exit(0)
+OUT_ROOT = Path(args.out_root)
+DATA_DIR = OUT_ROOT.parent              # data/
+stadium_file = DATA_DIR / "stadiums.csv"
+
+output_file_game_travel = OUT_ROOT / "game_travel_distances.csv"
+output_file_travel = OUT_ROOT / "first_inning_nb_results_with_travel.csv"
+output_file_no_travel = OUT_ROOT / "first_inning_nb_results.csv"
+output_file_travel_openers = OUT_ROOT / "first_inning_nb_results_with_travel_openers.csv"
+output_file_no_travel_openers = OUT_ROOT / "first_inning_nb_results_openers.csv"
+opener_master_csv = OUT_ROOT / "all_series_opener_game_ids.csv"
+
+# --- Check stadium file (Path-safe) ---
+if not stadium_file.exists():
+    raise SystemExit(f"Stadium file not found: {stadium_file.resolve()}")
 
 stadiums = pd.read_csv(stadium_file)
+
+# force numeric lat/lon so haversine doesn't get strings
+stadiums["lat"] = pd.to_numeric(stadiums["lat"], errors="coerce")
+stadiums["lon"] = pd.to_numeric(stadiums["lon"], errors="coerce")
+stadiums = stadiums.dropna(subset=["team_id", "lat", "lon"])
+
 stad_dict = stadiums.set_index("team_id")[["lat", "lon"]].to_dict(orient="index")
 
 # --- Haversine function ---
@@ -52,9 +67,9 @@ TRAVEL_THRESHOLD = 0.1  # km
 
 # --- Process each year ---
 for year in years:
-    year_folder = f"/Users/kevinhe/orioles-project/data/out/{year}"
-    game_file = f"{year_folder}/first_inning_runs_summary_{year}.csv"
-    if not os.path.exists(game_file):
+    year_folder = OUT_ROOT / str(year)
+    game_file = year_folder / f"first_inning_runs_summary_{year}.csv"
+    if not game_file.exists():
         print(f"Skipping {year} — file not found: {game_file}")
         continue
 
