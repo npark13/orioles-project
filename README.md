@@ -170,6 +170,28 @@ COMMAND: python modeling/predict_first_inning_weighted.py \
 --end 2024 \
 --games-root data/out \
 --per-inning data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv \
+--target home \
+--outdir .
+OUTPUTS:
+- modeling_dataset_weighted.csv
+- model_metrics_weighted.txt
+- roc_logit.png
+- roc_boost.png
+- calib_logit.png
+- calib_boost.png
+- feature_importances_boost.csv
+- predictions_logit.csv
+- predictions_boost.csv
+- logit_pipeline_home.joblib
+- boost_pipeline_home.joblib
+
+INPUTS:
+- data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv
+COMMAND: python modeling/predict_first_inning_weighted.py \
+--start 2013 \
+--end 2024 \
+--games-root data/out \
+--per-inning data/out/rolling_avg/game_level_with_rolling_avg_2014_2024_all_clean.csv \
 --target yrfi \
 --outdir .
 OUTPUTS:
