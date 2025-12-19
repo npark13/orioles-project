@@ -11,6 +11,7 @@ COMMAND: python scraper.py parse-events-recursive data --out data/out
 OUTPUTS:
 - data/out/<year>/plays.csv 
 - data/out/<year>/games.csv
+- data/out/<year>/roster.csv
 
 INPUTS:
 - data/**
@@ -92,11 +93,30 @@ OUTPUTS:
 
 5) TRAVEL
 INPUTS:
+- data/out/<year>/games.csv (per-year games)
+- data/out/<year>/plays.csv (per-year plays)
+COMMAND: python calculate_first_inning_runs.py --out_root data/out
+OUTPUTS:
+- data/out/<year>/first_inning_runs_summary_<year>.csv (per-year)
+
+INPUTS:
+- data/stadiums.csv
+- first_inning_runs_summary_<year>.csv (per-year)
+COMMAND python all_in_one.py --out_root data/out
+OUTPUTS:
+- data/out/game_travel_distances.csv
 - data/out/first_inning_nb_results.csv
 - data/out/first_inning_nb_results_with_travel.csv
 - data/out/first_inning_nb_results_openers.csv
 - data/out/first_inning_nb_results_with_travel_openers.csv
-COMMAND: python visualize_three.py
+- data/out/all_series_opener_game_ids.csv
+
+INPUTS:
+- data/out/first_inning_nb_results.csv
+- data/out/first_inning_nb_results_with_travel.csv
+- data/out/first_inning_nb_results_openers.csv
+- data/out/first_inning_nb_results_with_travel_openers.csv
+COMMAND: python visualize_travel_effect.py
 OUTPUTS:
 - data/out/home_advantage_travel_diff.csv
 - data/out/home_advantage_travel_diff_openers.csv
