@@ -24,7 +24,7 @@ args = ap.parse_args()
 
 OUT_ROOT = Path(args.out_root)
 DATA_DIR = OUT_ROOT.parent              # data/
-stadium_file = DATA_DIR / "stadiums.csv"
+stadium_file = DATA_DIR / "out" / "stadiums.csv"
 
 output_file_game_travel = OUT_ROOT / "game_travel_distances.csv"
 output_file_travel = OUT_ROOT / "first_inning_nb_results_with_travel.csv"
